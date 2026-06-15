@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(cpu_sim C)
+project(assembler C)
 set(CMAKE_C_STANDARD 11)
 
 if(MSVC)
@@ -9,6 +9,5 @@ else()
 endif()
 
 file(GLOB SOURCES "src/*.c")
-
-add_executable(cpu_sim ${SOURCES})
-target_include_directories(cpu_sim PRIVATE src)
+add_executable(assembler ${SOURCES})
+target_include_directories(assembler PRIVATE src)
