@@ -4,19 +4,19 @@
 #include <stdint.h>
 
 typedef enum {
-  TOK_MNEMONIC,
-  TOK_REG,
-  TOK_IMM,
-  TOK_LABEL_DEF,
-  TOK_LABEL_REF,
-  TOK_DIRECTIVE,
-  TOK_NEWLINE,
-  TOK_EOF,
-  TOK_UNKNOWN
+  TOKEN_MNEMONIC,
+  TOKEN_REG,
+  TOKEN_IMM,
+  TOKEN_LABEL_DEF,
+  TOKEN_LABEL_REF,
+  TOKEN_DIRECTIVE,
+  TOKEN_NEWLINE,
+  TOKEN_EOF,
+  TOKEN_UNKNOWN
 } TokenType;
 
 typedef struct {
-  TokenType token_type;
+  TokenType type;
   union {
     char str[64];
     int reg;
@@ -25,5 +25,15 @@ typedef struct {
   int line;
   int col;
 } Token;
+
+typedef struct {
+  const char *src;
+  int pos;
+  int line;
+  int col;
+} Lexer;
+
+void lexer_init(Lexer *lexer, const char *src);
+Token next_token(Lexer *lexer);
 
 #endif
