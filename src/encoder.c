@@ -144,15 +144,60 @@ uint32_t encode_bl(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   return encode_branch(stmt, 0x94000000, pc, symtab);
 }
 
+uint32_t encode_cbx(Stmt *stmt, uint32_t base, uint32_t pc, SymTab *symtab) {
+  if (stmt->instr.operand_count != 2) {
+    fprintf(stderr, "Error: cbz/cbnz takes 2 operands at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  Operand *reg = &stmt->instr.operands[0];
+  Operand *target = &stmt->instr.operands[1];
+
+  if (reg->type != OP_REG) {
+    fprintf(stderr, "Error: cbz/cbnz first operand must be a register at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t rt = (uint32_t)reg->reg & 0x1F;
+
+  int32_t offset = 0;
+  if (target->type == OP_LABEL) {
+    uint32_t addr = 0;
+    if (!symtab_lookup(symtab, target->label, &addr)) {
+      fprintf(stderr, "Error: undefined label \"%s\" at line: %d.\n", target->label, stmt->line);
+      return 0;
+    }
+    offset = (int32_t)(addr - pc) / 4;
+  } else if (target->type == OP_IMM) {
+    offset = (int32_t)(target->imm - pc) / 4;
+  } else {
+    fprintf(stderr, "Error: cbz/cbnz second operand must be a label at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t imm19 = (uint32_t)offset & 0x7FFFF;
+  return base | (imm19 << 5) | rt;
+}
+
+uint32_t encode_cbz(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_cbx(stmt, 0xB4000000, pc, symtab);
+}
+
+uint32_t encode_cbnz(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_cbx(stmt, 0xB5000000, pc, symtab);
+}
+
 uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   char *m = stmt->instr.mnemonic;
   if (strcasecmp(m, "mov") == 0) return encode_mov(stmt);
   if (strcasecmp(m, "add") == 0) return encode_add(stmt);
   if (strcasecmp(m, "sub") == 0) return encode_sub(stmt);
   if (strcasecmp(m, "svc") == 0) return encode_svc(stmt);
-  if (strcasecmp(m, "b") == 0) return encode_b(stmt, pc, symtab);
-  if (strcasecmp(m, "bl") == 0) return encode_bl(stmt, pc, symtab);
+  if (strcasecmp(m, "b") == 0)   return encode_b(stmt, pc, symtab);
+  if (strcasecmp(m, "bl") == 0)  return encode_bl(stmt, pc, symtab);
   if (strcasecmp(m, "ret") == 0) return encode_ret(stmt);
+  if (strcasecmp(m, "cbz") == 0) return encode_cbz(stmt, pc, symtab);
+  if (strcasecmp(m, "cbnz") == 0) return encode_cbnz(stmt, pc, symtab);
 
   fprintf(stderr, "Error: unknown mnemonic \"%s\" at line: %d.\n", m, stmt->line);
   return 0;
