@@ -133,7 +133,7 @@ bool try_scan_register(Token *token, char *str) {
 
 bool is_mnemonic(const char *str) {
   const char *mnemonics[] = {
-    "mov", "add", "sub", "svc", "b", "bl", "ret", "ldr", "str", "cmp", "cbz", "cbnz", NULL
+    "mov", "add", "sub", "svc", "b", "bl", "ret", "ldr", "str", "cmp", "cbz", "cbnz", "b.eq", "b.ne", NULL
   };
 
   for (int i = 0; mnemonics[i]; i++) {
@@ -147,7 +147,7 @@ bool is_mnemonic(const char *str) {
 
 Token scan_identifier(Lexer *lexer, Token *token) {
   int i = 0;
-  while (isalnum(peek(lexer)) || peek(lexer) == '_') {
+  while (isalnum(peek(lexer)) || peek(lexer) == '_' || (peek(lexer) == '.' && isalpha(peek_next(lexer)))) {
     token->str[i++] = advance(lexer);
   }
   token->str[i] = '\0';

@@ -187,17 +187,84 @@ uint32_t encode_cbnz(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   return encode_cbx(stmt, 0xB5000000, pc, symtab);
 }
 
+uint32_t encode_cmp(Stmt *stmt) {
+  if (stmt->instr.operand_count != 2) {
+    fprintf(stderr, "Error: cmp takes 2 operands at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  Operand *lhs = &stmt->instr.operands[0];
+  Operand *rhs = &stmt->instr.operands[1];
+
+  if (lhs->type != OP_REG) {
+    fprintf(stderr, "Error: cmp first operand must be a register at lnie: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t rn = (uint32_t)lhs->reg & 0x1F;
+  uint32_t rd = 31;
+
+  if (rhs->type == OP_IMM) {
+    uint32_t imm12 = (uint32_t)rhs->imm & 0xFFF;
+    return 0xF1000000 | (imm12 << 10) | (rn << 5) | rd;
+  } else if (rhs->type == OP_REG) {
+    uint32_t rm = (uint32_t)rhs->reg & 0x1F;
+    return 0xEB000000 | (rm << 16) | (rn << 5) | rd;
+  }
+
+  fprintf(stderr, "Error: cmp second operand must be a register and immediate at line: %d.\n", stmt->line);
+  return 0;
+}
+
+uint32_t encode_bcond(Stmt *stmt, uint32_t cond, uint32_t pc, SymTab *symtab) {
+  if (stmt->instr.operand_count != 1) {
+    fprintf(stderr, "Error: b.cond takes 1 operand at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  Operand *target = &stmt->instr.operands[0];
+
+  int32_t offset = 0;
+  if (target->type == OP_LABEL) {
+    uint32_t addr = 0;
+    if (!symtab_lookup(symtab, target->label, &addr)) {
+      fprintf(stderr, "Error: undefined label \"%s\" at line: %d.\n", target->label, stmt->line);
+      return 0;
+    }
+    offset = (int32_t)(addr - pc) / 4;
+  } else if (target->type == OP_IMM) {
+    offset = (int32_t)(target->imm - pc) / 4;
+  } else {
+    fprintf(stderr, "Error: b.cond operand must be a label or immediate at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t imm19 = (uint32_t)offset & 0x7FFFF;
+  return 0x54000000 | (imm19 << 5) | cond;
+}
+
+uint32_t encode_beq(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_bcond(stmt, 0x0, pc, symtab);
+}
+
+uint32_t encode_bne(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_bcond(stmt, 0x1, pc, symtab);
+}
+
 uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   char *m = stmt->instr.mnemonic;
-  if (strcasecmp(m, "mov") == 0) return encode_mov(stmt);
-  if (strcasecmp(m, "add") == 0) return encode_add(stmt);
-  if (strcasecmp(m, "sub") == 0) return encode_sub(stmt);
-  if (strcasecmp(m, "svc") == 0) return encode_svc(stmt);
-  if (strcasecmp(m, "b") == 0)   return encode_b(stmt, pc, symtab);
-  if (strcasecmp(m, "bl") == 0)  return encode_bl(stmt, pc, symtab);
-  if (strcasecmp(m, "ret") == 0) return encode_ret(stmt);
-  if (strcasecmp(m, "cbz") == 0) return encode_cbz(stmt, pc, symtab);
+  if (strcasecmp(m, "mov") == 0)  return encode_mov(stmt);
+  if (strcasecmp(m, "add") == 0)  return encode_add(stmt);
+  if (strcasecmp(m, "sub") == 0)  return encode_sub(stmt);
+  if (strcasecmp(m, "svc") == 0)  return encode_svc(stmt);
+  if (strcasecmp(m, "b") == 0)    return encode_b(stmt, pc, symtab);
+  if (strcasecmp(m, "bl") == 0)   return encode_bl(stmt, pc, symtab);
+  if (strcasecmp(m, "ret") == 0)  return encode_ret(stmt);
+  if (strcasecmp(m, "cbz") == 0)  return encode_cbz(stmt, pc, symtab);
   if (strcasecmp(m, "cbnz") == 0) return encode_cbnz(stmt, pc, symtab);
+  if (strcasecmp(m, "cmp") == 0)  return encode_cmp(stmt);
+  if (strcasecmp(m, "b.eq") == 0) return encode_beq(stmt, pc, symtab);
+  if (strcasecmp(m, "b.ne") == 0) return encode_bne(stmt, pc, symtab);
 
   fprintf(stderr, "Error: unknown mnemonic \"%s\" at line: %d.\n", m, stmt->line);
   return 0;
