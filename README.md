@@ -1,5 +1,5 @@
 # ARM Assembler
-A simple AArch64 assembler written entirely in C from scratch. It converts `.s` ARM source code into an ELF64 binary that can be run using an emulator such as QEMU or on native hardware.
+A simple AArch64 assembler written entirely in C from scratch. It converts ARM source code into an ELF64 binary that can be run using an emulator such as QEMU or native on real hardware.
 
 ## Build
 ### **Needs to be built on Linux. For Windows, use WSL.**
@@ -13,7 +13,7 @@ Then use CMake:
 cmake -B build
 cmake --build build
 ```
-On Linux the executable gets written to `build/assembler`.
+The final executable will be written to: `build/assembler`.
 
 ## Usage
 ```
@@ -40,7 +40,7 @@ $ echo $?
 ```
 
 ## Features
-- Lexer
+- Lexer.
   - [x] Converts source into tokens.
   - [x] Handles whitespaces and comments.
   - [X] Scans:
@@ -50,10 +50,10 @@ $ echo $?
     - [x] Immediates.
     - [x] Registers.
     - [X] Mnemonics.
-- Parser
+- Parser.
   - [x] Converts Tokens into statements (`Stmt`).
   - [x] Creates a dynamic array of statements (`Program`).
-- Encoder
+- Encoder.
   - [x] Converts all mnemonics into machine code.
-- ELF Builder
+- ELF Builder.
   - [x] Combines ELF header, Program header, and all machine code into a binary.
