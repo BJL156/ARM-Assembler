@@ -1,22 +1,28 @@
 # ARM Assembler
+[![Language](https://img.shields.io/badge/language-C-blue.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
+[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20WSL-lightgrey.svg)](https://www.linux.org/)
+[![Architecture](https://img.shields.io/badge/target-AArch64-red.svg)](https://developer.arm.com/Architectures/AArch64)
+
 A simple AArch64 assembler written entirely in C from scratch. It converts ARM source code into an ELF64 binary that can be run using an emulator such as QEMU or native on real hardware.
 
 ## Build
-### **Needs to be built on Linux. For Windows, use WSL.**
+> [!NOTE]
+> **Needs to be built on Linux. For Windows, use WSL.**
+
 Clone the repository and change into its directory:
-```
+```bash
 git clone https://github.com/BJL156/ARM-Assembler
 cd ARM-Assembler
 ```
 Then use CMake:
-```
+```bash
 cmake -B build
 cmake --build build
 ```
 The final executable will be written to: `build/assembler`.
 
 ## Usage
-```
+```bash
 ./assembler <file.s> <output>
   <file.s>  assembly file to run.
   <output>  name of the final ELF binary.
@@ -24,7 +30,7 @@ The final executable will be written to: `build/assembler`.
 
 ## Example
 ### Input (`asm/return.s`)
-```
+```s
 .global _start
 _start:
   mov x8, #93
@@ -32,9 +38,9 @@ _start:
   svc #0
 ```
 ### Output
-```
-$ ./build/assembler asm/return.s build/hello
-$ ./build/hello
+```bash
+$ ./build/assembler asm/return.s build/return
+$ ./build/return (or qemu-aarch64 ./build/return)
 $ echo $?
 67
 ```
@@ -43,13 +49,13 @@ $ echo $?
 - Lexer.
   - [x] Converts source into tokens.
   - [x] Handles whitespaces and comments.
-  - [X] Scans:
+  - [x] Scans:
     - [x] End of file (`EOF`).
     - [x] New lines.
     - [x] Directives.
     - [x] Immediates.
     - [x] Registers.
-    - [X] Mnemonics.
+    - [x] Mnemonics.
 - Parser.
   - [x] Converts Tokens into statements (`Stmt`).
   - [x] Creates a dynamic array of statements (`Program`).
