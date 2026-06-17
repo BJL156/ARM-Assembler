@@ -3,7 +3,7 @@
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20WSL-lightgrey.svg)](https://www.linux.org/)
 [![Architecture](https://img.shields.io/badge/target-AArch64-red.svg)](https://developer.arm.com/Architectures/AArch64)
 
-A simple AArch64 assembler written entirely in C from scratch. It converts ARM source code into an ELF64 binary that can be run using an emulator such as QEMU or native on real hardware.
+A small AArch64 assembler written entirely from scratch in C. It translates AArch64 source code into a Linux ELF64 binary that can be run on real hardware or through emulators such as QEMU.
 
 ## Build
 > [!NOTE]
@@ -24,8 +24,8 @@ The final executable will be written to: `build/assembler`.
 ## Usage
 ```bash
 ./assembler <file.s> <output>
-  <file.s>  assembly file to run.
-  <output>  name of the final ELF binary.
+  <file.s>  AArch64 assembly source file.
+  <output>  Output ELF64 executable.
 ```
 
 ## Example
