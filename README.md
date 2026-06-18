@@ -2,6 +2,7 @@
 [![Language](https://img.shields.io/badge/language-C-blue.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20WSL-lightgrey.svg)](https://www.linux.org/)
 [![Architecture](https://img.shields.io/badge/target-AArch64-red.svg)](https://developer.arm.com/Architectures/AArch64)
+[![Instructions](https://img.shields.io/badge/instructions-13-success.svg)](#supported-instructions)
 
 A small AArch64 assembler written entirely from scratch in C. It translates AArch64 source code into a Linux ELF64 binary that can be run on real hardware or through emulators such as QEMU.
 
@@ -63,3 +64,12 @@ $ echo $?
   - [x] Converts all mnemonics into machine code.
 - ELF Builder.
   - [x] Combines ELF header, Program header, and all machine code into a binary.
+
+## Support Instructions
+| Category | Instructions |
+|:---------:|:------------|
+| Data Movement | `mov`, `ldr`, `str` |
+| Arithmetic | `add`, `sub` |
+| Comparison | `cmp` |
+| Branching | `b`, `bl`, `ret`, `cbz`, `cbnz`, `b.eq`, `b.ne` |
+| System | `svc` |
