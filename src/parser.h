@@ -8,7 +8,8 @@
 typedef enum {
   OP_REG,
   OP_IMM,
-  OP_LABEL
+  OP_LABEL,
+  OP_MEM,
 } OperandType;
 
 typedef struct {
@@ -17,6 +18,10 @@ typedef struct {
     int reg;
     int64_t imm;
     char label[64];
+    struct {
+      int base_reg;
+      int64_t offset;
+    } mem;
   };
 } Operand;
 

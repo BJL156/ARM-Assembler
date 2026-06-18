@@ -65,6 +65,31 @@ Stmt parse_instr(Lexer *lexer, Token first) {
     } else if (token.type == TOKEN_LABEL_REF) {
       op.type = OP_LABEL;
       strncpy(op.label, token.str, sizeof(op.label) - 1);
+    } else if (token.type == TOKEN_LBRACKET) {
+      Token base = next_token(lexer);
+      if (base.type != TOKEN_REG) {
+        fprintf(stderr, "Error: expected register after left bracket at line: %d.\n", base.line);
+        break;
+      }
+
+      int64_t offset = 0;
+      Token next = next_token(lexer);
+      if (next.type == TOKEN_UNKNOWN) {
+        next = next_token(lexer);
+        if (next.type == TOKEN_IMM) {
+          offset = next.imm;
+          next = next_token(lexer);
+        }
+      }
+      
+      if (next.type != TOKEN_RBRACKET) {
+        fprintf(stderr, "Error: expected right bracket at line: %d.\n", next.line);
+        break;
+      }
+
+      op.type = OP_MEM;
+      op.mem.base_reg = base.reg;
+      op.mem.offset = offset;
     } else {
       fprintf(stderr, "Error: unexpected token in operand at line %d.\n", token.line);
       break;

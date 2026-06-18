@@ -185,7 +185,22 @@ Token next_token(Lexer *lexer) {
   if (c == '\n')  return scan_newline(lexer, &token);
   if (c == '.')   return scan_directive(lexer, &token);
   if (c == '#')   return scan_immediate(lexer, &token);
-  if (isalpha(c) || c == '_') return scan_identifier(lexer, &token);
+  
+  if (c == '[') {
+    advance(lexer);
+    token.type = TOKEN_LBRACKET;
+    return token;
+  }
+
+  if (c == ']') {
+    advance(lexer);
+    token.type = TOKEN_RBRACKET;
+    return token;
+  }
+
+  if (isalpha(c) || c == '_') {
+    return scan_identifier(lexer, &token);
+  }
 
   advance(lexer);
   token.type = TOKEN_UNKNOWN;

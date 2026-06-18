@@ -251,6 +251,40 @@ uint32_t encode_bne(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   return encode_bcond(stmt, 0x1, pc, symtab);
 }
 
+uint32_t encode_ldrstr(Stmt *stmt, uint32_t base) {
+  if (stmt->instr.operand_count != 2) {
+    fprintf(stderr, "Error: ldr/str takes 2 operands at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  Operand *rt = &stmt->instr.operands[0];
+  Operand *mem = &stmt->instr.operands[1];
+
+  if (rt->type != OP_REG || mem->type != OP_MEM) {
+    fprintf(stderr, "Error: ldr/str expects register, [register, immediate] at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  if (mem->mem.offset % 8 != 0) {
+    fprintf(stderr, "Error: ldr/str offset must be divisible by 8 at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t rd = (uint32_t)rt->reg & 0x1F;
+  uint32_t rn = (uint32_t)mem->mem.base_reg & 0x1F;
+  uint32_t imm12 = (uint32_t)(mem->mem.offset / 8) & 0xFFF;
+
+  return base | (imm12 << 10) | (rn << 5) | rd;
+}
+
+uint32_t encode_ldr(Stmt *stmt) {
+  return encode_ldrstr(stmt, 0xF9400000);
+}
+
+uint32_t encode_str(Stmt *stmt) {
+  return encode_ldrstr(stmt, 0xF9000000);
+}
+
 uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   char *m = stmt->instr.mnemonic;
   if (strcasecmp(m, "mov") == 0)  return encode_mov(stmt);
@@ -265,6 +299,8 @@ uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   if (strcasecmp(m, "cmp") == 0)  return encode_cmp(stmt);
   if (strcasecmp(m, "b.eq") == 0) return encode_beq(stmt, pc, symtab);
   if (strcasecmp(m, "b.ne") == 0) return encode_bne(stmt, pc, symtab);
+  if (strcasecmp(m, "ldr") == 0)  return encode_ldr(stmt);
+  if (strcasecmp(m, "str") == 0)  return encode_str(stmt);
 
   fprintf(stderr, "Error: unknown mnemonic \"%s\" at line: %d.\n", m, stmt->line);
   return 0;
