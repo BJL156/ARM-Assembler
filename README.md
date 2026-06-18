@@ -65,7 +65,7 @@ $ echo $?
 - ELF Builder.
   - [x] Combines ELF header, Program header, and all machine code into a binary.
 
-## Support Instructions
+## Supported Instructions
 | Category | Instructions |
 |:---------:|:------------|
 | Data Movement | `mov`, `ldr`, `str` |
