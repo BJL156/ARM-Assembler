@@ -23,6 +23,12 @@ uint32_t encode_mov(Stmt *stmt) {
     return 0;
   }
 
+  if (src->type == OP_REG) {
+    uint32_t rd = (uint32_t)dst->reg & 0x1F;
+    uint32_t rm = (uint32_t)src->reg & 0x1F;
+    return 0xAA0003E0 | (rm << 16) | rd;
+  }
+
   if (src->type != OP_IMM) {
     fprintf(stderr, "Error: mov src must be an immediate at line: %d", stmt->line);
     return 0;
@@ -285,6 +291,10 @@ uint32_t encode_str(Stmt *stmt) {
   return encode_ldrstr(stmt, 0xF9000000);
 }
 
+uint32_t encode_nop() {
+  return 0xD503201F;
+}
+
 uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   char *m = stmt->instr.mnemonic;
   if (strcasecmp(m, "mov") == 0)  return encode_mov(stmt);
@@ -301,6 +311,7 @@ uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   if (strcasecmp(m, "b.ne") == 0) return encode_bne(stmt, pc, symtab);
   if (strcasecmp(m, "ldr") == 0)  return encode_ldr(stmt);
   if (strcasecmp(m, "str") == 0)  return encode_str(stmt);
+  if (strcasecmp(m, "nop") == 0)  return encode_nop();
 
   fprintf(stderr, "Error: unknown mnemonic \"%s\" at line: %d.\n", m, stmt->line);
   return 0;
