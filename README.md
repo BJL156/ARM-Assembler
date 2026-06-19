@@ -48,7 +48,7 @@ $ echo $?
 
 ## Features
 - Lexer.
-  - [x] Converts source into tokens.
+  - [x] Converts AArch64 source into tokens.
   - [x] Handles whitespaces and comments.
   - [x] Scans:
     - [x] End of file (`EOF`).
@@ -59,15 +59,15 @@ $ echo $?
     - [x] Mnemonics.
 - Parser.
   - [x] Converts Tokens into statements (`Stmt`).
-  - [x] Creates a dynamic array of statements (`Program`).
+  - [x] Stores a dynamic array of statements (`Program`).
 - Encoder.
-  - [x] Converts all mnemonics into machine code.
+  - [x] Converts all supported mnemonics into machine code.
 - ELF Builder.
-  - [x] Combines ELF header, Program header, and all machine code into a binary.
+  - [x] Combines ELF header, Program header, and all machine code into a binary that can be ran within an AArch64 Linux enviroment or using an emulator.
 
 ## Supported Instructions
 | Category | Instructions |
-|:---------:|:------------|
+|:----------|:------------|
 | Data Movement | `mov`, `ldr`, `str` |
 | Arithmetic | `add`, `sub` |
 | Comparison | `cmp` |
