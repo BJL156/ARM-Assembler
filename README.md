@@ -68,6 +68,7 @@ $ echo $?
     - [x] Immediates.
     - [x] Registers.
     - [x] Mnemonics.
+    - [x] Strings.
 - Parser.
   - [x] Converts Tokens into statements (`Stmt`).
   - [x] Stores a dynamic array of statements (`Program`).
