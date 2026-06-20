@@ -30,7 +30,7 @@ uint32_t encode_mov(Stmt *stmt) {
   }
 
   if (src->type != OP_IMM) {
-    fprintf(stderr, "Error: mov src must be an immediate at line: %d", stmt->line);
+    fprintf(stderr, "Error: mov src must be a register and or immediate at line: %d", stmt->line);
     return 0;
   }
 
@@ -295,6 +295,34 @@ uint32_t encode_nop() {
   return 0xD503201F;
 }
 
+uint32_t encode_adr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  if (stmt->instr.operand_count != 2) {
+    fprintf(stderr, "Error: adr takes 2 operands at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  Operand *dst = &stmt->instr.operands[0];
+  Operand *target = &stmt->instr.operands[1];
+
+  if (dst->type != OP_REG || target->type != OP_LABEL) {
+    fprintf(stderr, "Error: adr expects register, label at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t addr = 0;
+  if (!symtab_lookup(symtab, target->label, &addr)) {
+    fprintf(stderr, "Error: undefined label \"%s\" at line: %d.\n", target->label, stmt->line);
+    return 0;
+  }
+
+  int32_t offset = (int32_t)(addr - pc);
+  uint32_t rd = (uint32_t)dst->reg & 0x1F;
+  uint32_t immlo = (uint32_t)offset & 0x3;
+  uint32_t immhi = ((uint32_t)offset >> 2) & 0x7FFFF;
+
+  return 0x10000000 | (immlo << 29) | (immhi << 5) | rd;
+}
+
 uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   char *m = stmt->instr.mnemonic;
   if (strcasecmp(m, "mov") == 0)  return encode_mov(stmt);
@@ -312,6 +340,7 @@ uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   if (strcasecmp(m, "ldr") == 0)  return encode_ldr(stmt);
   if (strcasecmp(m, "str") == 0)  return encode_str(stmt);
   if (strcasecmp(m, "nop") == 0)  return encode_nop();
+  if (strcasecmp(m, "adr") == 0)  return encode_adr(stmt, pc, symtab);
 
   fprintf(stderr, "Error: unknown mnemonic \"%s\" at line: %d.\n", m, stmt->line);
   return 0;

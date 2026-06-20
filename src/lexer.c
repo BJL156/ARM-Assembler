@@ -133,7 +133,7 @@ bool try_scan_register(Token *token, char *str) {
 
 bool is_mnemonic(const char *str) {
   const char *mnemonics[] = {
-    "mov", "add", "sub", "svc", "b", "bl", "ret", "ldr", "str", "cmp", "cbz", "cbnz", "b.eq", "b.ne", "nop", NULL
+    "mov", "add", "sub", "svc", "b", "bl", "ret", "ldr", "str", "cmp", "cbz", "cbnz", "b.eq", "b.ne", "nop", "adr", NULL
   };
 
   for (int i = 0; mnemonics[i]; i++) {
@@ -171,6 +171,36 @@ Token scan_identifier(Lexer *lexer, Token *token) {
   return *token;
 }
 
+Token scan_string(Lexer *lexer, Token *token) {
+  advance(lexer);
+
+  int i = 0;
+  while (peek(lexer) != '"' && peek(lexer) != '\0' && i < 63) {
+    char c = advance(lexer);
+    if (c == '\\') {
+      char escape_code = advance(lexer);
+      switch (escape_code) {
+        case 'n':  token->str[i++] = '\n'; break;
+        case 't':  token->str[i++] = '\t'; break;
+        case '\\': token->str[i++] = '\\'; break;
+        case '"':  token->str[i++] = '"'; break;
+        case '0':  token->str[i++] = '\0'; break;
+        default:   token->str[i++] = escape_code; break;
+      }
+    } else {
+      token->str[i++] = c;
+    }
+  }
+
+  if (peek(lexer) == '"') {
+    advance(lexer);
+  }
+
+  token->str[i] = '\0';
+  token->type = TOKEN_STRING;
+  return *token;
+}
+
 Token next_token(Lexer *lexer) {
   skip_whitespace(lexer);
 
@@ -185,6 +215,7 @@ Token next_token(Lexer *lexer) {
   if (c == '\n') return scan_newline(lexer, &token);
   if (c == '.')  return scan_directive(lexer, &token);
   if (c == '#')  return scan_immediate(lexer, &token);
+  if (c == '"')  return scan_string(lexer, &token);
   
   if (c == '[') {
     advance(lexer);

@@ -27,7 +27,9 @@ Stmt parse_directive(Lexer *lexer, Token first) {
   strncpy(stmt.directive.name, first.str, sizeof(stmt.directive.name) - 1);
 
   Token arg = next_token(lexer);
-  if (arg.type == TOKEN_LABEL_REF || arg.type == TOKEN_MNEMONIC) {
+  if (arg.type == TOKEN_LABEL_REF ||
+      arg.type == TOKEN_MNEMONIC ||
+      arg.type == TOKEN_STRING) {
     strncpy(stmt.directive.arg, arg.str, sizeof(stmt.directive.arg) - 1);
   }
 

@@ -14,6 +14,7 @@ typedef enum {
   TOKEN_LBRACKET,
   TOKEN_RBRACKET,
   TOKEN_EOF,
+  TOKEN_STRING,
   TOKEN_UNKNOWN
 } TokenType;
 

@@ -1,5 +1,5 @@
 #include "elf64.h"
-#include "encoder.h"
+#include "layout.h"
 #include "lexer.h"
 #include "parser.h"
 #include "symtab.h"
@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+#include <strings.h>
 
 static char *read_file(const char *filepath) {
   FILE *file = fopen(filepath, "r");
@@ -45,49 +47,27 @@ int main(int argc, char *argv[]) {
   parse(&lexer, &program);
   free(src);
 
-  uint64_t load_addr = 0x400000;
-  uint64_t file_offset = sizeof(Elf64_Ehdr) + sizeof(Elf64_Phdr);
-  uint32_t pc = (uint32_t)(load_addr + file_offset);
-  
   SymTab symtab;
-  symtab_init(&symtab);
+  symtab_init(&symtab); 
 
-  for (int i = 0; i < program.count; i++) {
-    Stmt *stmt = &program.stmts[i];
-    if (stmt->type == STMT_LABEL) {
-      symtab_define(&symtab, stmt->label, pc);
-    } else if (stmt->type == STMT_INSTR) {
-      pc += 4;
-    }
-  }
+  Layout layout;
+  layout_init(&layout, &program);
+  layout_create_symtab(&layout, &program, &symtab);
 
-  int instr_count = 0;
-  for (int i = 0; i < program.count; i++) {
-    if (program.stmts[i].type == STMT_INSTR) {
-      instr_count++;
-    }
-  }
-
-  uint32_t *text = malloc(instr_count * sizeof(uint32_t));
-  pc = (uint32_t)(load_addr + file_offset);
-  int j = 0;
-
-  for (int i = 0; i < program.count; i++) {
-    Stmt *stmt = &program.stmts[i];
-    if (stmt->type == STMT_INSTR) {
-      text[j++] = encode_instr(stmt, pc, &symtab);
-      pc += 4;
-    }
-  }
+  uint32_t *text = malloc(layout.text_size);
+  uint8_t *data = malloc(layout.data_size);
+  layout_encode_program(&layout, &program, &symtab, text, data);
 
   FILE *output = fopen(argv[2], "wb");
   if (!output) {
     fprintf(stderr, "Error: Failed to open \"%s\".\n", argv[2]);
     return 1;
   }
-  write_elf64(output, text, instr_count * sizeof(uint32_t));
+  write_elf64(output, text, layout.text_size, data, layout.data_size);
+  fclose(output);
 
   free(text);
+  free(data);
   symtab_free(&symtab);
   program_free(&program);
 
