@@ -19,7 +19,7 @@ uint32_t encode_mov(Stmt *stmt) {
   Operand *src = &stmt->instr.operands[1];
 
   if (dst->type != OP_REG) {
-    fprintf(stderr, "Error: mov dst must be a register at line: %d", stmt->line);
+    fprintf(stderr, "Error: mov dst must be a register at line: %d.\n", stmt->line);
     return 0;
   }
 
@@ -30,13 +30,19 @@ uint32_t encode_mov(Stmt *stmt) {
   }
 
   if (src->type != OP_IMM) {
-    fprintf(stderr, "Error: mov src must be a register and or immediate at line: %d", stmt->line);
+    fprintf(stderr, "Error: mov src must be a register and or immediate at line: %d.\n", stmt->line);
     return 0;
   }
 
   uint32_t rd = (uint32_t)dst->reg & 0x1F;
-  uint32_t imm = (uint32_t)src->imm & 0xFFFF;
-  return 0xD2800000 | (imm << 5) | rd;
+
+  if (src->imm < 0) {
+    uint32_t imm16 = (uint32_t)(~src->imm) & 0xFFFF;
+    return 0x92800000 | (imm16 << 5) | rd;
+  } else {
+    uint32_t imm16 = (uint32_t)src->imm & 0xFFFF;
+    return 0xD2800000 | (imm16 << 5) | rd;
+  }
 }
 
 uint32_t encode_add(Stmt *stmt) {
@@ -128,7 +134,7 @@ uint32_t encode_branch(Stmt *stmt, uint32_t base, uint32_t pc, SymTab *symtab) {
   } else if (op->type == OP_LABEL) {
     uint32_t target = 0;
     if (!symtab_lookup(symtab, op->label, &target)) {
-      fprintf(stderr, "Error: undefined label \"%s\" at line: %d", op->label, stmt->line);
+      fprintf(stderr, "Error: undefined label \"%s\" at line: %d.\n", op->label, stmt->line);
       return 0;
     }
 
