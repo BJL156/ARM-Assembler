@@ -4,6 +4,7 @@
   msg: .asciz "Hello, world!\n"
 
 .text
+_start:
   mov x0, #-100
   adr x1, path
   mov x2, #0x241

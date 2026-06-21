@@ -263,7 +263,7 @@ uint32_t encode_bne(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   return encode_bcond(stmt, 0x1, pc, symtab);
 }
 
-uint32_t encode_ldrstr(Stmt *stmt, uint32_t base) {
+uint32_t encode_ldr_str(Stmt *stmt, uint32_t base) {
   if (stmt->instr.operand_count != 2) {
     fprintf(stderr, "Error: ldr/str takes 2 operands at line: %d.\n", stmt->line);
     return 0;
@@ -290,11 +290,11 @@ uint32_t encode_ldrstr(Stmt *stmt, uint32_t base) {
 }
 
 uint32_t encode_ldr(Stmt *stmt) {
-  return encode_ldrstr(stmt, 0xF9400000);
+  return encode_ldr_str(stmt, 0xF9400000);
 }
 
 uint32_t encode_str(Stmt *stmt) {
-  return encode_ldrstr(stmt, 0xF9000000);
+  return encode_ldr_str(stmt, 0xF9000000);
 }
 
 uint32_t encode_nop() {
@@ -329,6 +329,35 @@ uint32_t encode_adr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   return 0x10000000 | (immlo << 29) | (immhi << 5) | rd;
 }
 
+uint32_t encode_ldrb_strb(Stmt *stmt, uint32_t base) {
+  if (stmt->instr.operand_count != 2) {
+    fprintf(stderr, "Error: ldrb/strb takes 2 operands at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  Operand *rt = &stmt->instr.operands[0];
+  Operand *mem = &stmt->instr.operands[1];
+
+  if (rt->type != OP_REG || mem->type != OP_MEM) {
+    fprintf(stderr, "Error: ldrb/strb expects register, [register, immediate] at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t rd = (uint32_t)rt->reg & 0x1F;
+  uint32_t rn = (uint32_t)mem->mem.base_reg & 0x1F;
+  uint32_t imm12 = (uint32_t)mem->mem.offset & 0xFFF;
+
+  return base | (imm12 << 10) | (rn << 5) | rd;
+}
+
+uint32_t encode_ldrb(Stmt *stmt) {
+  return encode_ldrb_strb(stmt, 0x39400000);
+}
+
+uint32_t encode_strb(Stmt *stmt) {
+  return encode_ldrb_strb(stmt, 0x39000000);
+}
+
 uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   char *m = stmt->instr.mnemonic;
   if (strcasecmp(m, "mov") == 0)  return encode_mov(stmt);
@@ -347,6 +376,8 @@ uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   if (strcasecmp(m, "str") == 0)  return encode_str(stmt);
   if (strcasecmp(m, "nop") == 0)  return encode_nop();
   if (strcasecmp(m, "adr") == 0)  return encode_adr(stmt, pc, symtab);
+  if (strcasecmp(m, "ldrb") == 0) return encode_ldrb(stmt);
+  if (strcasecmp(m, "strb") == 0) return encode_strb(stmt);
 
   fprintf(stderr, "Error: unknown mnemonic \"%s\" at line: %d.\n", m, stmt->line);
   return 0;
