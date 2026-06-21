@@ -2,7 +2,7 @@
 [![Language](https://img.shields.io/badge/language-C-blue.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20WSL-lightgrey.svg)](https://www.linux.org/)
 [![Architecture](https://img.shields.io/badge/target-AArch64-red.svg)](https://developer.arm.com/Architectures/AArch64)
-[![Instructions](https://img.shields.io/badge/instructions-14-success.svg)](#Supported-Instructions)
+[![Instructions](https://img.shields.io/badge/instructions-15-success.svg)](#Supported-Instructions)
 
 A small AArch64 assembler written entirely from scratch in C. It translates AArch64 source code into a Linux ELF64 binary that can be run on real hardware or through emulators such as QEMU.
 
@@ -30,20 +30,31 @@ The final executable will be written to: `build/assembler`.
 ```
 
 ## Example
-### Input (`asm/return.s`)
+### Input (`asm/hello.s`)
 ```s
 .global _start
+.data
+  msg: .asciz "Hello, world!\n"
+
+.text
 _start:
+  adr x1, msg
+  mov x2, #14
+  mov x0, #1
+  mov x8, #64
+  svc #0
+
+  mov x0, #0
   mov x8, #93
-  mov x0, #67
   svc #0
 ```
 ### Output
 ```bash
-$ ./build/assembler asm/return.s build/return
-$ ./build/return (or qemu-aarch64 ./build/return)
+$ ./build/assembler ./asm/hello.s build/hello
+$ ./build/hello (or qemu-aarch64 ./build/hello)
+Hello, world!
 $ echo $?
-67
+0
 ```
 
 ## Features
@@ -57,6 +68,7 @@ $ echo $?
     - [x] Immediates.
     - [x] Registers.
     - [x] Mnemonics.
+    - [x] Strings.
 - Parser.
   - [x] Converts Tokens into statements (`Stmt`).
   - [x] Stores a dynamic array of statements (`Program`).
@@ -68,7 +80,7 @@ $ echo $?
 ## Supported Instructions
 | Category | Instructions |
 |:----------|:------------|
-| Data Movement | `mov`, `ldr`, `str` |
+| Data Movement | `mov`, `ldr`, `str`, `adr` |
 | Arithmetic | `add`, `sub` |
 | Comparison | `cmp` |
 | Branching | `b`, `bl`, `ret`, `cbz`, `cbnz`, `b.eq`, `b.ne` |
