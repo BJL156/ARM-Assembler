@@ -2,7 +2,7 @@
 [![Language](https://img.shields.io/badge/language-C-blue.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20WSL-lightgrey.svg)](https://www.linux.org/)
 [![Architecture](https://img.shields.io/badge/target-AArch64-red.svg)](https://developer.arm.com/Architectures/AArch64)
-[![Instructions](https://img.shields.io/badge/instructions-15-success.svg)](#Supported-Instructions)
+[![Instructions](https://img.shields.io/badge/instructions-17-success.svg)](#Supported-Instructions)
 
 A small AArch64 assembler written entirely from scratch in C. It translates AArch64 source code into a Linux ELF64 binary that can be run on real hardware or through emulators such as QEMU.
 
@@ -80,8 +80,8 @@ $ echo $?
 ## Supported Instructions
 | Category | Instructions |
 |:----------|:------------|
-| Data Movement | `mov`, `ldr`, `str`, `adr` |
+| Data Movement | `mov`, `ldr`, `str`, `ldrb`, `strb`, `adr` |
 | Arithmetic | `add`, `sub` |
 | Comparison | `cmp` |
-| Branching | `b`, `bl`, `ret`, `cbz`, `cbnz`, `b.eq`, `b.ne` |
+| Branching | `b`, `bl`, `b.eq`, `b.ne`, `ret`, `cbz`, `cbnz` |
 | System / Hints | `svc`, `nop` |
