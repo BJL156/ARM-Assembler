@@ -380,6 +380,36 @@ uint32_t encode_mul(Stmt *stmt) {
   return 0x9B007C00 | (rm << 16) | (rn << 5) | rd;
 }
 
+uint32_t encode_div(Stmt *stmt, uint32_t base) {
+  if (stmt->instr.operand_count != 3) {
+    fprintf(stderr, "Error: udiv/sdiv takes 3 operands at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  Operand *dst = &stmt->instr.operands[0];
+  Operand *src = &stmt->instr.operands[1];
+  Operand *op2 = &stmt->instr.operands[2];
+
+  if (dst->type != OP_REG || src->type != OP_REG || op2->type != OP_REG) {
+    fprintf(stderr, "Error: udiv/sdiv takes 3 operands at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t rd = (uint32_t)dst->reg & 0x1F;
+  uint32_t rn = (uint32_t)src->reg & 0x1F;
+  uint32_t rm = (uint32_t)op2->reg & 0x1F;
+
+  return base | (rm << 16) | (rn << 5) | rd;
+}
+
+uint32_t encode_udiv(Stmt *stmt) {
+  return encode_div(stmt, 0x9AC00800);
+}
+
+uint32_t encode_sdiv(Stmt *stmt) {
+  return encode_div(stmt, 0x9AC00C00);
+}
+
 uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   char *m = stmt->instr.mnemonic;
   if (strcasecmp(m, "mov") == 0)  return encode_mov(stmt);
@@ -401,6 +431,8 @@ uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   if (strcasecmp(m, "ldrb") == 0) return encode_ldrb(stmt);
   if (strcasecmp(m, "strb") == 0) return encode_strb(stmt);
   if (strcasecmp(m, "mul") == 0)  return encode_mul(stmt);
+  if (strcasecmp(m, "udiv") == 0) return encode_udiv(stmt);
+  if (strcasecmp(m, "sdiv") == 0) return encode_sdiv(stmt);
 
   fprintf(stderr, "Error: unknown mnemonic \"%s\" at line: %d.\n", m, stmt->line);
   return 0;
