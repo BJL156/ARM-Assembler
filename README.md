@@ -77,7 +77,14 @@ $ echo $?
 - ELF Builder.
   - [x] Combines ELF header, Program header, and all machine code into a binary that can be ran within an AArch64 Linux enviroment or using an emulator.
 
-## Supported Instructions
+## Current Limitations
+- Linux ELF64 output only.
+- Small set of AArch64 instructions.
+- No relocations.
+- No linker support (converts straight to an ELF64).
+- Single-file assembly programs only.
+
+## Implemented AArch64 Instructions
 | Category | Instructions |
 |:----------|:------------|
 | Data Movement | `mov`, `ldr`, `str`, `ldrb`, `strb`, `adr` |
