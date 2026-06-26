@@ -2,7 +2,7 @@
 [![Language](https://img.shields.io/badge/language-C-blue.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20WSL-lightgrey.svg)](https://www.linux.org/)
 [![Architecture](https://img.shields.io/badge/target-AArch64-red.svg)](https://developer.arm.com/Architectures/AArch64)
-[![Instructions](https://img.shields.io/badge/instructions-18-success.svg)](#Supported-Instructions)
+[![Instructions](https://img.shields.io/badge/instructions-20-success.svg)](#Supported-Instructions)
 
 A small AArch64 assembler written entirely from scratch in C. It translates AArch64 source code into a Linux ELF64 binary that can be run on real hardware or through emulators such as QEMU.
 
@@ -77,11 +77,18 @@ $ echo $?
 - ELF Builder.
   - [x] Combines ELF header, Program header, and all machine code into a binary that can be ran within an AArch64 Linux enviroment or using an emulator.
 
-## Supported Instructions
+## Current Limitations
+- Linux ELF64 output only.
+- Small set of AArch64 instructions.
+- No relocations.
+- No linker support (converts straight to an ELF64).
+- Single-file assembly programs only.
+
+## Implemented AArch64 Instructions
 | Category | Instructions |
 |:----------|:------------|
 | Data Movement | `mov`, `ldr`, `str`, `ldrb`, `strb`, `adr` |
-| Arithmetic | `add`, `sub`, `mul` |
+| Arithmetic | `add`, `sub`, `mul`, `udiv`, `sdiv` |
 | Comparison | `cmp` |
 | Branching | `b`, `bl`, `b.eq`, `b.ne`, `ret`, `cbz`, `cbnz` |
 | System / Hints | `svc`, `nop` |
