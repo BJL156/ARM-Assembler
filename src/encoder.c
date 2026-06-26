@@ -410,6 +410,60 @@ uint32_t encode_sdiv(Stmt *stmt) {
   return encode_div(stmt, 0x9AC00C00);
 }
 
+uint32_t encode_logical_reg(Stmt *stmt, uint32_t base) {
+  if (stmt->instr.operand_count != 3) {
+    fprintf(stderr, "Error: logical takes 3 operands at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  Operand *dst = &stmt->instr.operands[0];
+  Operand *src = &stmt->instr.operands[1];
+  Operand *src2 = &stmt->instr.operands[2];
+
+  if (dst->type != OP_REG || src->type != OP_REG || src2 != OP_REG) {
+    fprintf(stderr, "Error: logical takes register, register, register at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t rd = (uint32_t)dst->reg & 0x1F;
+  uint32_t rn = (uint32_t)src->reg & 0x1F;
+  uint32_t rm = (uint32_t)src2->reg & 0x1F;
+
+  return base | (rm << 16) | (rn << 5) | rd;
+}
+
+uint32_t encode_and(Stmt *stmt) {
+  return encode_logical_reg(stmt, 0x8A000000);
+}
+
+uint32_t encode_orr(Stmt *stmt) {
+  return encode_logical_reg(stmt, 0xAA000000);
+}
+
+uint32_t encode_eor(Stmt *stmt) {
+  return encode_logical_reg(stmt, 0xCA000000);
+}
+
+uint32_t encode_mvn(Stmt *stmt) {
+  if (stmt->instr.operand_count != 2) {
+    fprintf(stderr, "Error: mvn takes 2 operands at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  Operand *dst = &stmt->instr.operands[0];
+  Operand *src = &stmt->instr.operands[1];
+
+  if (dst->type != OP_REG || src != OP_REG) {
+    fprintf(stderr, "Error: mvn takes register, register at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t rd = (uint32_t)dst->reg & 0x1F;
+  uint32_t rm = (uint32_t)src->reg & 0x1F;
+
+  return 0xAA200000 | (rm << 16) | (0x1F) | rd;
+}
+
 uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   char *m = stmt->instr.mnemonic;
   if (strcasecmp(m, "mov") == 0)  return encode_mov(stmt);
@@ -433,6 +487,10 @@ uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   if (strcasecmp(m, "mul") == 0)  return encode_mul(stmt);
   if (strcasecmp(m, "udiv") == 0) return encode_udiv(stmt);
   if (strcasecmp(m, "sdiv") == 0) return encode_sdiv(stmt);
+  if (strcasecmp(m, "and") == 0)  return encode_and(stmt);
+  if (strcasecmp(m, "orr") == 0)  return encode_orr(stmt);
+  if (strcasecmp(m, "eor") == 0)  return encode_eor(stmt);
+  if (strcasecmp(m, "mvn") == 0)  return encode_mvn(stmt);
 
   fprintf(stderr, "Error: unknown mnemonic \"%s\" at line: %d.\n", m, stmt->line);
   return 0;

@@ -133,7 +133,7 @@ bool try_scan_register(Token *token, char *str) {
 
 bool is_mnemonic(const char *str) {
   const char *mnemonics[] = {
-    "mov", "add", "sub", "svc", "b", "bl", "ret", "ldr", "str", "cmp", "cbz", "cbnz", "b.eq", "b.ne", "nop", "adr", "ldrb", "strb",  "mul", "sdiv", "udiv", NULL
+    "mov", "add", "sub", "svc", "b", "bl", "ret", "ldr", "str", "cmp", "cbz", "cbnz", "b.eq", "b.ne", "nop", "adr", "ldrb", "strb",  "mul", "sdiv", "udiv", "and", "orr", "eor", "mvn", NULL
   };
 
   for (int i = 0; mnemonics[i]; i++) {
