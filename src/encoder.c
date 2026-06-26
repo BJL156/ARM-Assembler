@@ -263,6 +263,46 @@ uint32_t encode_bne(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   return encode_bcond(stmt, 0x1, pc, symtab);
 }
 
+uint32_t encode_blt(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_bcond(stmt, 0xB, pc, symtab);
+}
+
+uint32_t encode_ble(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_bcond(stmt, 0xD, pc, symtab);
+}
+
+uint32_t encode_bgt(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_bcond(stmt, 0xC, pc, symtab);
+}
+
+uint32_t encode_bge(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_bcond(stmt, 0xA, pc, symtab);
+}
+
+uint32_t encode_bhi(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_bcond(stmt, 0x8, pc, symtab);
+}
+
+uint32_t encode_blo(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_bcond(stmt, 0x3, pc, symtab);
+}
+
+uint32_t encode_bhs(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_bcond(stmt, 0x2, pc, symtab);
+}
+
+uint32_t encode_bls(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_bcond(stmt, 0x9, pc, symtab);
+}
+
+uint32_t encode_bmi(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_bcond(stmt, 0x4, pc, symtab);
+}
+
+uint32_t encode_bpl(Stmt *stmt, uint32_t pc, SymTab *symtab) {
+  return encode_bcond(stmt, 0x5, pc, symtab);
+}
+
 uint32_t encode_ldr_str(Stmt *stmt, uint32_t base) {
   if (stmt->instr.operand_count != 2) {
     fprintf(stderr, "Error: ldr/str takes 2 operands at line: %d.\n", stmt->line);
@@ -478,6 +518,16 @@ uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   if (strcasecmp(m, "cmp") == 0)  return encode_cmp(stmt);
   if (strcasecmp(m, "b.eq") == 0) return encode_beq(stmt, pc, symtab);
   if (strcasecmp(m, "b.ne") == 0) return encode_bne(stmt, pc, symtab);
+  if (strcasecmp(m, "b.lt") == 0) return encode_blt(stmt, pc, symtab);
+  if (strcasecmp(m, "b.le") == 0) return encode_ble(stmt, pc, symtab);
+  if (strcasecmp(m, "b.gt") == 0) return encode_bgt(stmt, pc, symtab);
+  if (strcasecmp(m, "b.ge") == 0) return encode_bge(stmt, pc, symtab);
+  if (strcasecmp(m, "b.hi") == 0) return encode_bhi(stmt, pc, symtab);
+  if (strcasecmp(m, "b.lo") == 0) return encode_blo(stmt, pc, symtab);
+  if (strcasecmp(m, "b.hs") == 0) return encode_bhs(stmt, pc, symtab);
+  if (strcasecmp(m, "b.ls") == 0) return encode_bls(stmt, pc, symtab);
+  if (strcasecmp(m, "b.mi") == 0) return encode_bmi(stmt, pc, symtab);
+  if (strcasecmp(m, "b.pl") == 0) return encode_bpl(stmt, pc, symtab);
   if (strcasecmp(m, "ldr") == 0)  return encode_ldr(stmt);
   if (strcasecmp(m, "str") == 0)  return encode_str(stmt);
   if (strcasecmp(m, "nop") == 0)  return encode_nop();
