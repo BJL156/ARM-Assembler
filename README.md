@@ -89,6 +89,7 @@ $ echo $?
 |:----------|:------------|
 | Data Movement | `mov`, `ldr`, `str`, `ldrb`, `strb`, `adr` |
 | Arithmetic | `add`, `sub`, `mul`, `udiv`, `sdiv` |
+| Bitwise | `and`, `orr`, `eor`, `mvn` |
 | Comparison | `cmp` |
 | Branching | `b`, `bl`, `b.eq`, `b.ne`, `ret`, `cbz`, `cbnz` |
 | System / Hints | `svc`, `nop` |
