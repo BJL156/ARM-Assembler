@@ -44,7 +44,7 @@ Stmt parse_instr(Lexer *lexer, Token first) {
   strncpy(stmt.instr.mnemonic, first.str, sizeof(stmt.instr.mnemonic) - 1);
 
   int i = 0;
-  while (i < 3) {
+  while (i < 4) {
     Token token = next_token(lexer);
 
     if (token.type == TOKEN_NEWLINE || token.type == TOKEN_EOF) {
@@ -74,24 +74,36 @@ Stmt parse_instr(Lexer *lexer, Token first) {
         break;
       }
 
-      int64_t offset = 0;
+      op.type = OP_MEM;
+      op.mem.base_reg = base.reg;
+      op.mem.offset = 0;
+      op.mem.mode = MEM_OFFSET;
+
       Token next = next_token(lexer);
+
       if (next.type == TOKEN_UNKNOWN) {
-        next = next_token(lexer);
-        if (next.type == TOKEN_IMM) {
-          offset = next.imm;
-          next = next_token(lexer);
+        Token imm = next_token(lexer);
+        if (imm.type == TOKEN_IMM) {
+          op.mem.offset = imm.imm;
         }
+        next = next_token(lexer); // should be ']'
       }
-      
+
       if (next.type != TOKEN_RBRACKET) {
         fprintf(stderr, "Error: expected right bracket at line: %d.\n", next.line);
         break;
       }
 
-      op.type = OP_MEM;
-      op.mem.base_reg = base.reg;
-      op.mem.offset = offset;
+      Token after = next_token(lexer);
+      if (after.type == TOKEN_UNKNOWN && after.str[0] == '!') {
+        op.mem.mode = MEM_PRE_INDEX;
+      } else if (after.type == TOKEN_UNKNOWN && after.str[0] == ',') {
+        Token post_imm = next_token(lexer);
+        if (post_imm.type == TOKEN_IMM) {
+          op.mem.offset = post_imm.imm;
+          op.mem.mode = MEM_POST_INDEX;
+        }
+      }
     } else {
       fprintf(stderr, "Error: unexpected token in operand at line %d.\n", token.line);
       break;

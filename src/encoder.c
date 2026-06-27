@@ -504,6 +504,58 @@ uint32_t encode_mvn(Stmt *stmt) {
   return 0xAA200000 | (rm << 16) | (0x1F) | rd;
 }
 
+uint32_t encode_ldp_stp(Stmt *stmt, uint32_t base_offset, uint32_t base_pre_index, uint32_t base_post_index) {
+  if (stmt->instr.operand_count != 3) {
+    fprintf(stderr, "Error: ldp/stp takes 3 operands at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  Operand *rt1 = &stmt->instr.operands[0];
+  Operand *rt2 = &stmt->instr.operands[1];
+  Operand *mem = &stmt->instr.operands[2];
+
+  if (rt1->type != OP_REG || rt2->type != OP_REG || mem->type != OP_MEM) {
+    fprintf(stderr, "Error: ldp/stp expects register, register, [register, immediate] at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  if (mem->mem.offset % 8 != 0) {
+    fprintf(stderr, "Error: ldp/stp offset must be divisible by 8 at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t r1 = (uint32_t)rt1->reg & 0x1F;
+  uint32_t r2 = (uint32_t)rt2->reg & 0x1F;
+  uint32_t rn = (uint32_t)mem->mem.base_reg & 0x1F;
+  uint32_t imm7 = (uint32_t)(mem->mem.offset / 8) & 0x7F;
+
+  uint32_t base;
+  switch (mem->mem.mode) {
+    case MEM_PRE_INDEX: {
+      base = base_pre_index;
+      break;
+    }
+    case MEM_POST_INDEX: {
+      base = base_post_index;
+      break;
+    }
+    default: {
+      base = base_offset;
+      break;
+    }
+  }
+
+  return base | (imm7 << 15) | (r2 << 10) | (rn << 5) | r1;
+}
+
+uint32_t encode_ldp(Stmt *stmt) {
+  return encode_ldp_stp(stmt, 0xA9400000, 0xA9C00000, 0xA8C00000);
+}
+
+uint32_t encode_stp(Stmt *stmt) {
+  return encode_ldp_stp(stmt, 0xA9000000, 0xA9800000, 0xA8800000);
+}
+
 uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   char *m = stmt->instr.mnemonic;
   if (strcasecmp(m, "mov") == 0)  return encode_mov(stmt);
@@ -541,6 +593,8 @@ uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   if (strcasecmp(m, "orr") == 0)  return encode_orr(stmt);
   if (strcasecmp(m, "eor") == 0)  return encode_eor(stmt);
   if (strcasecmp(m, "mvn") == 0)  return encode_mvn(stmt);
+  if (strcasecmp(m, "ldp") == 0)  return encode_ldp(stmt);
+  if (strcasecmp(m, "stp") == 0)  return encode_stp(stmt);
 
   fprintf(stderr, "Error: unknown mnemonic \"%s\" at line: %d.\n", m, stmt->line);
   return 0;

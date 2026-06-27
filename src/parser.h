@@ -6,6 +6,18 @@
 #include <stdint.h>
 
 typedef enum {
+  MEM_OFFSET,
+  MEM_PRE_INDEX,
+  MEM_POST_INDEX
+} MemMode;
+
+typedef struct {
+  int base_reg;
+  int64_t offset;
+  MemMode mode;
+} MemOperand;
+
+typedef enum {
   OP_REG,
   OP_IMM,
   OP_LABEL,
@@ -18,10 +30,7 @@ typedef struct {
     int reg;
     int64_t imm;
     char label[64];
-    struct {
-      int base_reg;
-      int64_t offset;
-    } mem;
+    MemOperand mem;
   };
 } Operand;
 
@@ -41,7 +50,7 @@ typedef struct {
     }   directive;
     struct {
       char mnemonic[64];
-      Operand operands[3];
+      Operand operands[4];
       int operand_count;
     } instr;
   };
