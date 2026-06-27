@@ -4,7 +4,9 @@
 [![Architecture](https://img.shields.io/badge/target-AArch64-red.svg)](https://developer.arm.com/Architectures/AArch64)
 [![Instructions](https://img.shields.io/badge/instructions-35-success.svg)](#Supported-Instructions)
 
-A small AArch64 assembler written entirely from scratch in C. It translates AArch64 source code into a Linux ELF64 binary that can be run on real hardware or through emulators such as QEMU.
+A lightweight, zero-dependency AArch64 assembler written from scratch in C. This tool compiles AArch64 assembly source code directly into native Linux ELF64 executables, suitable for execution on bare-metal hardware or via emulators like QEMU.
+
+This AArch64 assembler is the next phase of my deep dive into systems programming. It builds upon the foundations laid in my previous project, [CPU Simulator](https://github.com/BJL156/CPU-Simulator).
 
 ## Build
 > [!NOTE]
