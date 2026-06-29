@@ -47,7 +47,8 @@ typedef struct {
     struct {
       char name[64];
       char arg[64];
-    }   directive;
+      int64_t arg_imm;
+    } directive;
     struct {
       char mnemonic[64];
       Operand operands[4];

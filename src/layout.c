@@ -20,8 +20,18 @@ void layout_init(Layout *layout, Program *program) {
     Stmt *stmt = &program->stmts[i];
     if (stmt->type == STMT_INSTR) {
       instr_count++;
-    } else if (stmt->type == STMT_DIRECTIVE && strcasecmp(stmt->directive.name, "asciz") == 0) {
-      data_size += strlen(stmt->directive.arg) + 1;
+    } else if (stmt->type == STMT_DIRECTIVE) {
+      if (strcasecmp(stmt->directive.name, "asciz") == 0) {
+        data_size += strlen(stmt->directive.arg) + 1;
+      } else if (strcasecmp(stmt->directive.name, "byte") == 0) {
+        data_size += 1;
+      } else if (strcasecmp(stmt->directive.name, "word") == 0) {
+        data_size += 4;
+      } else if (strcasecmp(stmt->directive.name, "quad") == 0) {
+        data_size += 8;
+      } else if (strcasecmp(stmt->directive.name, "space") == 0) {
+        data_size += (size_t)stmt->directive.arg_imm;
+      }
     }
   }
 
@@ -51,6 +61,14 @@ void layout_create_symtab(Layout *layout, Program *program, SymTab *symtab) {
         section = SECTION_DATA;
       } else if (strcasecmp(stmt->directive.name, "asciz") == 0) {
         data_cursor += strlen(stmt->directive.arg) + 1;
+      } else if (strcasecmp(stmt->directive.name, "byte") == 0) {
+        data_cursor += 1;
+      } else if (strcasecmp(stmt->directive.name, "word") == 0) {
+        data_cursor += 4;
+      } else if (strcasecmp(stmt->directive.name, "quad") == 0) {
+        data_cursor += 8;
+      } else if (strcasecmp(stmt->directive.name, "space") == 0) {
+        data_cursor += (size_t)stmt->directive.arg_imm;
       }
       continue;
     }
@@ -79,6 +97,22 @@ void layout_encode_program(Layout *layout, Program *program, SymTab *symtab, uin
       if (strcasecmp(stmt->directive.name, "asciz") == 0) {
         size_t len = strlen(stmt->directive.arg) + 1;
         memcpy(data + data_pos, stmt->directive.arg, len);
+        data_pos += len;
+      } else if (strcasecmp(stmt->directive.name, "byte") == 0) {
+        uint8_t val = (uint8_t)stmt->directive.arg_imm;
+        memcpy(data + data_pos, &val, 1);
+        data_pos += 1;
+      } else if (strcasecmp(stmt->directive.name, "word") == 0) {
+        uint32_t val = (uint8_t)stmt->directive.arg_imm;
+        memcpy(data + data_pos, &val, 4);
+        data_pos += 4;
+      } else if (strcasecmp(stmt->directive.name, "quad") == 0) {
+        uint64_t val = (uint8_t)stmt->directive.arg_imm;
+        memcpy(data + data_pos, &val, 8);
+        data_pos += 8;
+      } else if (strcasecmp(stmt->directive.name, "byte") == 0) {
+        size_t len = (size_t)stmt->directive.arg_imm;
+        memset(data + data_pos, 0, len);
         data_pos += len;
       }
       continue;

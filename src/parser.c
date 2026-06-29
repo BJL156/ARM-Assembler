@@ -31,6 +31,8 @@ Stmt parse_directive(Lexer *lexer, Token first) {
       arg.type == TOKEN_MNEMONIC ||
       arg.type == TOKEN_STRING) {
     strncpy(stmt.directive.arg, arg.str, sizeof(stmt.directive.arg) - 1);
+  } else if (arg.type == TOKEN_IMM) {
+    stmt.directive.arg_imm = arg.imm;
   }
 
   return stmt;
