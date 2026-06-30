@@ -44,6 +44,23 @@ void layout_init(Layout *layout, Program *program) {
   uint64_t text_end   = layout->text_seg_size;
   layout->data_offset = (text_end + PAGE_SIZE - 1) & ~((uint64_t)PAGE_SIZE - 1);
   layout->data_vaddr  = LOAD_ADDR + layout->data_offset;
+
+  layout->entry = layout->text_vaddr;
+}
+
+void layout_init_entry(Layout *layout, Program *program, SymTab *symtab) {
+  for (int i = 0; i < program->count; i++) {
+    Stmt *stmt = &program->stmts[i];
+    if (stmt->type == STMT_DIRECTIVE && strcasecmp(stmt->directive.name, "global") == 0) {
+      uint32_t addr = 0;
+      if (symtab_lookup(symtab, stmt->directive.arg, &addr)) {
+        layout->entry = addr;
+        return;
+      }
+    }
+  }
+
+  layout->entry = (uint64_t)layout->text_vaddr;
 }
 
 void layout_create_symtab(Layout *layout, Program *program, SymTab *symtab) {

@@ -53,6 +53,7 @@ int main(int argc, char *argv[]) {
   Layout layout;
   layout_init(&layout, &program);
   layout_create_symtab(&layout, &program, &symtab);
+  layout_init_entry(&layout, &program, &symtab);
 
   uint32_t *text = malloc(layout.text_size);
   uint8_t *data = malloc(layout.data_size);
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Error: Failed to open \"%s\".\n", argv[2]);
     return 1;
   }
-  write_elf64(output, text, layout.text_size, data, layout.data_size);
+  write_elf64(output, text, layout.text_size, data, layout.data_size, layout.entry);
   fclose(output);
 
   free(text);

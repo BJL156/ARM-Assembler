@@ -33,41 +33,39 @@ void setup_phdr(Elf64_Phdr *phdr, uint32_t flags, uint64_t offset, uint64_t vadd
   phdr->p_memsz  = size;
   phdr->p_align  = PAGE_SIZE;
 }
-void write_elf64(FILE *file, uint32_t *text, size_t text_size, uint8_t *data, size_t data_size) {
-    uint64_t ehdr_phdr_size = sizeof(Elf64_Ehdr) + sizeof(Elf64_Phdr) * 2;
+void write_elf64(FILE *file, uint32_t *text, size_t text_size, uint8_t *data, size_t data_size, uint64_t entry) {
+  uint64_t ehdr_phdr_size = sizeof(Elf64_Ehdr) + sizeof(Elf64_Phdr) * 2;
 
-    uint64_t text_code_vaddr  = LOAD_ADDR + ehdr_phdr_size;
+  uint64_t text_seg_offset = 0;
+  uint64_t text_seg_vaddr  = LOAD_ADDR;
+  uint64_t text_seg_size   = ehdr_phdr_size + text_size;
 
-    uint64_t text_seg_offset = 0;
-    uint64_t text_seg_vaddr  = LOAD_ADDR;
-    uint64_t text_seg_size   = ehdr_phdr_size + text_size;
+  uint64_t text_end    = text_seg_offset + text_seg_size;
+  uint64_t data_offset = (text_end + PAGE_SIZE - 1) & ~((uint64_t)PAGE_SIZE - 1);
+  uint64_t data_vaddr  = LOAD_ADDR + data_offset;
 
-    uint64_t text_end    = text_seg_offset + text_seg_size;
-    uint64_t data_offset = (text_end + PAGE_SIZE - 1) & ~((uint64_t)PAGE_SIZE - 1);
-    uint64_t data_vaddr  = LOAD_ADDR + data_offset;
+  Elf64_Ehdr ehdr;
+  memset(&ehdr, 0, sizeof(ehdr));
+  setup_ehdr(&ehdr, entry);
 
-    Elf64_Ehdr ehdr;
-    memset(&ehdr, 0, sizeof(ehdr));
-    setup_ehdr(&ehdr, text_code_vaddr);
+  Elf64_Phdr text_phdr;
+  memset(&text_phdr, 0, sizeof(text_phdr));
+  setup_phdr(&text_phdr, PF_R | PF_X, text_seg_offset, text_seg_vaddr, text_seg_size);
 
-    Elf64_Phdr text_phdr;
-    memset(&text_phdr, 0, sizeof(text_phdr));
-    setup_phdr(&text_phdr, PF_R | PF_X, text_seg_offset, text_seg_vaddr, text_seg_size);
+  Elf64_Phdr data_phdr;
+  memset(&data_phdr, 0, sizeof(data_phdr));
+  setup_phdr(&data_phdr, PF_R, data_offset, data_vaddr, data_size);
 
-    Elf64_Phdr data_phdr;
-    memset(&data_phdr, 0, sizeof(data_phdr));
-    setup_phdr(&data_phdr, PF_R, data_offset, data_vaddr, data_size);
+  fwrite(&ehdr, sizeof(ehdr), 1, file);
+  fwrite(&text_phdr, sizeof(text_phdr), 1, file);
+  fwrite(&data_phdr, sizeof(data_phdr), 1, file);
+  fwrite(text, text_size, 1, file);
 
-    fwrite(&ehdr, sizeof(ehdr), 1, file);
-    fwrite(&text_phdr, sizeof(text_phdr), 1, file);
-    fwrite(&data_phdr, sizeof(data_phdr), 1, file);
-    fwrite(text, text_size, 1, file);
+  long current_pos = sizeof(ehdr) + sizeof(text_phdr) + sizeof(data_phdr) + text_size;
+  while ((uint64_t)current_pos < data_offset) {
+    fputc(0, file);
+    current_pos++;
+  }
 
-    long current_pos = sizeof(ehdr) + sizeof(text_phdr) + sizeof(data_phdr) + text_size;
-    while ((uint64_t)current_pos < data_offset) {
-        fputc(0, file);
-        current_pos++;
-    }
-
-    fwrite(data, data_size, 1, file);
+  fwrite(data, data_size, 1, file);
 }
