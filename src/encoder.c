@@ -26,7 +26,8 @@ uint32_t encode_mov(Stmt *stmt) {
   if (src->type == OP_REG) {
     uint32_t rd = (uint32_t)dst->reg & 0x1F;
     uint32_t rm = (uint32_t)src->reg & 0x1F;
-    return 0xAA0003E0 | (rm << 16) | rd;
+    uint32_t base = dst->is_32bit ? 0x2A0003E0 : 0xAA0003E0;
+    return base | (rm << 16) | rd;
   }
 
   if (src->type != OP_IMM) {
@@ -38,10 +39,12 @@ uint32_t encode_mov(Stmt *stmt) {
 
   if (src->imm < 0) {
     uint32_t imm16 = (uint32_t)(~src->imm) & 0xFFFF;
-    return 0x92800000 | (imm16 << 5) | rd;
+    uint32_t base  = dst->is_32bit ? 0x12800000 : 0x92800000;
+    return base | (imm16 << 5) | rd;
   } else {
     uint32_t imm16 = (uint32_t)src->imm & 0xFFFF;
-    return 0xD2800000 | (imm16 << 5) | rd;
+    uint32_t base  = dst->is_32bit ? 0x52800000 : 0xD2800000;
+    return base | (imm16 << 5) | rd;
   }
 }
 
@@ -64,11 +67,13 @@ uint32_t encode_add(Stmt *stmt) {
   uint32_t rn = (uint32_t)src->reg & 0x1F;
 
   if (op2->type == OP_IMM) {
+    uint32_t base  = dst->is_32bit ? 0x11000000 : 0x91000000;
     uint32_t imm12 = (uint32_t)op2->imm & 0xFFF;
-    return 0x91000000 | (imm12 << 10) | (rn << 5) | rd;
+    return base | (imm12 << 10) | (rn << 5) | rd;
   } else if (op2->type == OP_REG) {
-    uint32_t rm = (uint32_t)op2->reg & 0x1F;
-    return 0x8B000000 | (rm << 16) | (rn << 5) | rd;
+    uint32_t base = dst->is_32bit ? 0x0B000000 : 0x8B000000;
+    uint32_t rm   = (uint32_t)op2->reg & 0x1F;
+    return base | (rm << 16) | (rn << 5) | rd;
   }
 
   fprintf(stderr, "Error: add third operand must be a register or immediate at line: %d.\n", stmt->line);
@@ -93,12 +98,14 @@ uint32_t encode_sub(Stmt *stmt) {
   uint32_t rd = (uint32_t)dst->reg & 0x1F;
   uint32_t rn = (uint32_t)src->reg & 0x1F;
 
-   if (op2->type == OP_IMM) {
+  if (op2->type == OP_IMM) {
+    uint32_t base  = dst->is_32bit ? 0x51000000 : 0xD1000000;
     uint32_t imm12 = (uint32_t)op2->imm & 0xFFF;
-    return 0xD1000000 | (imm12 << 10) | (rn << 5) | rd;
+    return base | (imm12 << 10) | (rn << 5) | rd;
   } else if (op2->type == OP_REG) {
-    uint32_t rm = (uint32_t)op2->reg & 0x1F;
-    return 0xCB000000 | (rm << 16) | (rn << 5) | rd;
+    uint32_t base = dst->is_32bit ? 0x4B000000 : 0xCB000000;
+    uint32_t rm   = (uint32_t)op2->reg & 0x1F;
+    return base | (rm << 16) | (rn << 5) | rd;
   }
 
   fprintf(stderr, "Error: add third operand must be a register or immediate at line: %d.\n", stmt->line);
@@ -217,11 +224,13 @@ uint32_t encode_cmp(Stmt *stmt) {
   uint32_t rd = 31;
 
   if (rhs->type == OP_IMM) {
+    uint32_t base  = lhs->is_32bit ? 0x71000000 : 0xF1000000;
     uint32_t imm12 = (uint32_t)rhs->imm & 0xFFF;
-    return 0xF1000000 | (imm12 << 10) | (rn << 5) | rd;
+    return base | (imm12 << 10) | (rn << 5) | rd;
   } else if (rhs->type == OP_REG) {
-    uint32_t rm = (uint32_t)rhs->reg & 0x1F;
-    return 0xEB000000 | (rm << 16) | (rn << 5) | rd;
+    uint32_t base = lhs->is_32bit ? 0x6B000000 : 0xEB000000;
+    uint32_t rm   = (uint32_t)rhs->reg & 0x1F;
+    return base | (rm << 16) | (rn << 5) | rd;
   }
 
   fprintf(stderr, "Error: cmp second operand must be a register and immediate at line: %d.\n", stmt->line);
@@ -416,8 +425,9 @@ uint32_t encode_mul(Stmt *stmt) {
   uint32_t rd = (uint32_t)dst->reg & 0x1F;
   uint32_t rn = (uint32_t)src->reg & 0x1F;
   uint32_t rm = (uint32_t)op2->reg & 0x1F;
+  uint32_t base = dst->is_32bit ? 0x1B007C00 : 0x9B007C00;
 
-  return 0x9B007C00 | (rm << 16) | (rn << 5) | rd;
+  return base | (rm << 16) | (rn << 5) | rd;
 }
 
 uint32_t encode_div(Stmt *stmt, uint32_t base) {
@@ -450,7 +460,7 @@ uint32_t encode_sdiv(Stmt *stmt) {
   return encode_div(stmt, 0x9AC00C00);
 }
 
-uint32_t encode_logical_reg(Stmt *stmt, uint32_t base) {
+uint32_t encode_logical_reg(Stmt *stmt, uint32_t base64, uint32_t base32) {
   if (stmt->instr.operand_count != 3) {
     fprintf(stderr, "Error: logical takes 3 operands at line: %d.\n", stmt->line);
     return 0;
@@ -468,20 +478,21 @@ uint32_t encode_logical_reg(Stmt *stmt, uint32_t base) {
   uint32_t rd = (uint32_t)dst->reg & 0x1F;
   uint32_t rn = (uint32_t)src->reg & 0x1F;
   uint32_t rm = (uint32_t)src2->reg & 0x1F;
+  uint32_t base = dst->is_32bit ? base32 : base64;
 
   return base | (rm << 16) | (rn << 5) | rd;
 }
 
 uint32_t encode_and(Stmt *stmt) {
-  return encode_logical_reg(stmt, 0x8A000000);
+  return encode_logical_reg(stmt, 0x8A000000, 0x0A000000);
 }
 
 uint32_t encode_orr(Stmt *stmt) {
-  return encode_logical_reg(stmt, 0xAA000000);
+  return encode_logical_reg(stmt, 0xAA000000, 0x2A000000);
 }
 
 uint32_t encode_eor(Stmt *stmt) {
-  return encode_logical_reg(stmt, 0xCA000000);
+  return encode_logical_reg(stmt, 0xCA000000, 0x4A000000);
 }
 
 uint32_t encode_mvn(Stmt *stmt) {
@@ -500,8 +511,9 @@ uint32_t encode_mvn(Stmt *stmt) {
 
   uint32_t rd = (uint32_t)dst->reg & 0x1F;
   uint32_t rm = (uint32_t)src->reg & 0x1F;
+  uint32_t base = dst->is_32bit ? 0x2A200000 : 0xAA200000;
 
-  return 0xAA200000 | (rm << 16) | (0x1F) | rd;
+  return base | (rm << 16) | (0x1F << 5) | rd;
 }
 
 uint32_t encode_ldp_stp(Stmt *stmt, uint32_t base_offset, uint32_t base_pre_index, uint32_t base_post_index) {

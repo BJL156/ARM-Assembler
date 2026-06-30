@@ -63,6 +63,7 @@ Stmt parse_instr(Lexer *lexer, Token first) {
     if (token.type == TOKEN_REG) {
       op.type = OP_REG;
       op.reg = token.reg;
+      op.is_32bit = token.is_32bit;
     } else if (token.type == TOKEN_IMM) {
       op.type = OP_IMM;
       op.imm = token.imm;

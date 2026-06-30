@@ -110,6 +110,7 @@ bool try_scan_register(Token *token, char *str) {
     if (strcmp(str + 1, "zr") == 0) {
       token->type = TOKEN_REG;
       token->reg = 31;
+      token->is_32bit = false;
       return true;
     }
 
@@ -118,13 +119,33 @@ bool try_scan_register(Token *token, char *str) {
     if (*end == '\0' && num >= 0 && num <= 30) {
       token->type = TOKEN_REG;
       token->reg = (int)num;
+      token->is_32bit = false;
       return true;
     }
   }
 
-  if (strcmp(str, "sp") == 0 || strcmp(str, "SP") == 0) {
+  if (str[0] == 'w' || str[0] == 'W') {
+    if (strcmp(str + 1, "zr") == 0) {
+      token->type = TOKEN_REG;
+      token->reg = 31;
+      token->is_32bit = true;
+      return true;
+    }
+
+    char *end;
+    long num = strtol(str + 1, &end, 10);
+    if (*end == '\0' && num >= 0 && num <= 30) {
+      token->type = TOKEN_REG;
+      token->reg = (int)num;
+      token->is_32bit = true;
+      return true;
+    }
+  }
+
+  if (strcasecmp(str, "sp") == 0) {
     token->type = TOKEN_REG;
     token->reg = 31;
+    token->is_32bit = false;
     return true;
   }
 

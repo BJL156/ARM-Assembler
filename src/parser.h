@@ -27,7 +27,10 @@ typedef enum {
 typedef struct {
   OperandType type;
   union {
-    int reg;
+    struct {
+      int reg;
+      bool is_32bit;
+    };
     int64_t imm;
     char label[64];
     MemOperand mem;

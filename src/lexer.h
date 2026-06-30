@@ -1,6 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 typedef enum {
@@ -27,6 +28,7 @@ typedef struct {
   };
   int line;
   int col;
+  bool is_32bit;
 } Token;
 
 typedef struct {
