@@ -568,6 +568,111 @@ uint32_t encode_stp(Stmt *stmt) {
   return encode_ldp_stp(stmt, 0xA9000000, 0xA9800000, 0xA8800000);
 }
 
+uint32_t encode_shift_reg(Stmt *stmt, uint32_t base64, uint32_t base32) {
+  if (stmt->instr.operand_count != 3) {
+    fprintf(stderr, "Error: shift takes 3 operands at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  Operand *dst = &stmt->instr.operands[0];
+  Operand *src1 = &stmt->instr.operands[1];
+  Operand *src2 = &stmt->instr.operands[2];
+
+  if (dst->type != OP_REG || src1->type != OP_REG || src2->type != OP_REG) {
+    fprintf(stderr, "Error: shift register takes register, register, register at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t rd = (uint32_t)dst->reg  & 0x1F;
+  uint32_t rn = (uint32_t)src1->reg & 0x1F;
+  uint32_t rm = (uint32_t)src2->reg & 0x1F;
+  uint32_t base = dst->is_32bit ? base32 : base64;
+
+  return base | (rm << 16) | (rn << 5) | rd;
+}
+
+uint32_t encode_lsl(Stmt *stmt) {
+  if (stmt->instr.operand_count == 3 && stmt->instr.operands[2].type == OP_REG) {
+    return encode_shift_reg(stmt, 0x9AC02000, 0x1AC02000);
+  }
+
+  Operand *dst = &stmt->instr.operands[0];
+  Operand *src = &stmt->instr.operands[1];
+  Operand *shift = &stmt->instr.operands[2];
+
+  if (dst->type != OP_REG || src->type != OP_REG || shift->type != OP_IMM) {
+    fprintf(stderr, "Error: lsl expects register, register, register/immediate at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t rd = (uint32_t)dst->reg & 0x1F;
+  uint32_t rn = (uint32_t)src->reg & 0x1F;
+
+  if (dst->is_32bit) {
+    uint32_t s = (uint32_t)shift->imm & 0x1F;
+    uint32_t immr = (32 - s) & 0x1F;
+    uint32_t imms = 31 - s;
+    return 0x53000000 | (immr << 16) | (imms << 10) | (rn << 5) | rd;
+  } else {
+    uint32_t s = (uint32_t)shift->imm & 0x3F;
+    uint32_t immr = (64 - s) & 0x3F;
+    uint32_t imms = 63 - s;
+    return 0xD3400000 | (immr << 16) | (imms << 10) | (rn << 5) | rd;
+  }
+}
+
+uint32_t encode_lsr(Stmt *stmt) {
+  if (stmt->instr.operand_count == 3 && stmt->instr.operands[2].type == OP_REG) {
+    return encode_shift_reg(stmt, 0x9AC02400, 0x1AC02400);
+  }
+
+  Operand *dst = &stmt->instr.operands[0];
+  Operand *src = &stmt->instr.operands[1];
+  Operand *shift = &stmt->instr.operands[2];
+
+  if (dst->type != OP_REG || src->type != OP_REG || shift->type != OP_IMM) {
+    fprintf(stderr, "Error: lsr expects register, register, register/immediate at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t rd = (uint32_t)dst->reg & 0x1F;
+  uint32_t rn = (uint32_t)src->reg & 0x1F;
+
+  if (dst->is_32bit) {
+    uint32_t immr = (uint32_t)shift->imm & 0x1F;
+    return 0x53000000 | (immr << 16) | (31 << 10) | (rn << 5) | rd;
+  } else {
+    uint32_t immr = (uint32_t)shift->imm & 0x3F;
+    return 0xD3400000 | (immr << 16) | (63 << 10) | (rn << 5) | rd;
+  }
+}
+
+uint32_t encode_asr(Stmt *stmt) {
+  if (stmt->instr.operand_count == 3 && stmt->instr.operands[2].type == OP_REG) {
+    return encode_shift_reg(stmt, 0x9AC02800, 0x1AC02800);
+  }
+
+  Operand *dst = &stmt->instr.operands[0];
+  Operand *src = &stmt->instr.operands[1];
+  Operand *shift = &stmt->instr.operands[2];
+
+  if (dst->type != OP_REG || src->type != OP_REG || shift->type != OP_IMM) {
+    fprintf(stderr, "Error: asr expects register, register, register/immediate at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t rd = (uint32_t)dst->reg & 0x1F;
+  uint32_t rn = (uint32_t)src->reg & 0x1F;
+
+  if (dst->is_32bit) {
+    uint32_t immr = (uint32_t)shift->imm & 0x1F;
+    return 0x13000000 | (immr << 16) | (31 << 10) | (rn << 5) | rd;
+  } else {
+    uint32_t immr = (uint32_t)shift->imm & 0x3F;
+    return 0x93400000 | (immr << 16) | (63 << 10) | (rn << 5) | rd;
+  }
+}
+
 uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   char *m = stmt->instr.mnemonic;
   if (strcasecmp(m, "mov") == 0)  return encode_mov(stmt);
@@ -607,6 +712,9 @@ uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   if (strcasecmp(m, "mvn") == 0)  return encode_mvn(stmt);
   if (strcasecmp(m, "ldp") == 0)  return encode_ldp(stmt);
   if (strcasecmp(m, "stp") == 0)  return encode_stp(stmt);
+  if (strcasecmp(m, "lsl") == 0)  return encode_lsl(stmt);
+  if (strcasecmp(m, "lsr") == 0)  return encode_lsr(stmt);
+  if (strcasecmp(m, "asr") == 0)  return encode_asr(stmt);
 
   fprintf(stderr, "Error: unknown mnemonic \"%s\" at line: %d.\n", m, stmt->line);
   return 0;
