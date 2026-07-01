@@ -68,7 +68,7 @@ $ echo $?
     - [x] New lines.
     - [x] Directives.
     - [x] Immediates.
-    - [x] Registers.
+    - [x] Registers (64 and 32 bit).
     - [x] Mnemonics.
     - [x] Strings.
 - Parser.
@@ -91,6 +91,7 @@ $ echo $?
 |:----------|:------------|
 | Data Movement | `mov`, `ldr`, `str`, `ldrb`, `strb`, `adr`, `ldp`, `stp` |
 | Arithmetic | `add`, `sub`, `mul`, `udiv`, `sdiv` |
+| Shift | `lsl`, `lsr`, `asr` |
 | Bitwise | `and`, `orr`, `eor`, `mvn` |
 | Branching | `b`, `bl`, `b.eq`, `b.ne`, `b.lt`, `b.le`, `b.gt`, `b.ge`, `b.hi`, `b.lo`, `b.hs`, `b.ls`, `b.mi`, `b.pl`, `ret`, `cbz`, `cbnz` |
 | Comparison | `cmp` |
