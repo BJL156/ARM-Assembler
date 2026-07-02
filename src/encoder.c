@@ -163,7 +163,7 @@ uint32_t encode_bl(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   return encode_branch(stmt, 0x94000000, pc, symtab);
 }
 
-uint32_t encode_cbx(Stmt *stmt, uint32_t base, uint32_t pc, SymTab *symtab) {
+uint32_t encode_cbx(Stmt *stmt, uint32_t base64, uint32_t base32, uint32_t pc, SymTab *symtab) {
   if (stmt->instr.operand_count != 2) {
     fprintf(stderr, "Error: cbz/cbnz takes 2 operands at line: %d.\n", stmt->line);
     return 0;
@@ -178,6 +178,7 @@ uint32_t encode_cbx(Stmt *stmt, uint32_t base, uint32_t pc, SymTab *symtab) {
   }
 
   uint32_t rt = (uint32_t)reg->reg & 0x1F;
+  uint32_t base = reg->is_32bit ? base32 : base64;
 
   int32_t offset = 0;
   if (target->type == OP_LABEL) {
@@ -199,11 +200,11 @@ uint32_t encode_cbx(Stmt *stmt, uint32_t base, uint32_t pc, SymTab *symtab) {
 }
 
 uint32_t encode_cbz(Stmt *stmt, uint32_t pc, SymTab *symtab) {
-  return encode_cbx(stmt, 0xB4000000, pc, symtab);
+  return encode_cbx(stmt, 0xB4000000, 0x34000000, pc, symtab);
 }
 
 uint32_t encode_cbnz(Stmt *stmt, uint32_t pc, SymTab *symtab) {
-  return encode_cbx(stmt, 0xB5000000, pc, symtab);
+  return encode_cbx(stmt, 0xB5000000, 0x35000000, pc, symtab);
 }
 
 uint32_t encode_cmp(Stmt *stmt) {
@@ -312,7 +313,7 @@ uint32_t encode_bpl(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   return encode_bcond(stmt, 0x5, pc, symtab);
 }
 
-uint32_t encode_ldr_str(Stmt *stmt, uint32_t base) {
+uint32_t encode_ldr_str(Stmt *stmt, uint32_t base64, uint32_t base32) {
   if (stmt->instr.operand_count != 2) {
     fprintf(stderr, "Error: ldr/str takes 2 operands at line: %d.\n", stmt->line);
     return 0;
@@ -326,24 +327,32 @@ uint32_t encode_ldr_str(Stmt *stmt, uint32_t base) {
     return 0;
   }
 
-  if (mem->mem.offset % 8 != 0) {
-    fprintf(stderr, "Error: ldr/str offset must be divisible by 8 at line: %d.\n", stmt->line);
-    return 0;
-  }
-
   uint32_t rd = (uint32_t)rt->reg & 0x1F;
   uint32_t rn = (uint32_t)mem->mem.base_reg & 0x1F;
-  uint32_t imm12 = (uint32_t)(mem->mem.offset / 8) & 0xFFF;
 
-  return base | (imm12 << 10) | (rn << 5) | rd;
+  if (rt->is_32bit) {
+    if (mem->mem.offset % 4 != 0) {
+      fprintf(stderr, "Error: 32-bit ldr/str offset must be divisible by 4 at line: %d.\n", stmt->line);
+      return 0;
+    }
+    uint32_t imm12 = (uint32_t)(mem->mem.offset / 4) & 0xFFF;
+    return base32 | (imm12 << 10) | (rn << 5) | rd;
+  } else {
+    if (mem->mem.offset % 8 != 0) {
+      fprintf(stderr, "Error: 64-bit ldr/str offset must be divisible by 8 at line: %d.\n", stmt->line);
+      return 0;
+    }
+    uint32_t imm12 = (uint32_t)(mem->mem.offset / 8) & 0xFFF;
+    return base64 | (imm12 << 10) | (rn << 5) | rd;
+  }
 }
 
 uint32_t encode_ldr(Stmt *stmt) {
-  return encode_ldr_str(stmt, 0xF9400000);
+  return encode_ldr_str(stmt, 0xF9400000, 0xB9400000);
 }
 
 uint32_t encode_str(Stmt *stmt) {
-  return encode_ldr_str(stmt, 0xF9000000);
+  return encode_ldr_str(stmt, 0xF9000000, 0xB9000000);
 }
 
 uint32_t encode_nop() {
