@@ -682,6 +682,27 @@ uint32_t encode_asr(Stmt *stmt) {
   }
 }
 
+uint32_t encode_neg(Stmt *stmt) {
+  if (stmt->instr.operand_count != 2) {
+    fprintf(stderr, "Error: neg takes 2 operands at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  Operand *dst = &stmt->instr.operands[0];
+  Operand *src = &stmt->instr.operands[1];
+
+  if (dst->type != OP_REG || src->type != OP_REG) {
+    fprintf(stderr, "Error: neg takes register, register at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t rd = (uint32_t)dst->reg & 0x1F;
+  uint32_t rm = (uint32_t)src->reg & 0x1F;
+  uint32_t base = dst->is_32bit ? 0x4B0003E0 : 0xCB0003E0;
+
+  return base | (rm << 16) | rd;
+}
+
 uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   char *m = stmt->instr.mnemonic;
   if (strcasecmp(m, "mov") == 0)  return encode_mov(stmt);
@@ -724,6 +745,7 @@ uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   if (strcasecmp(m, "lsl") == 0)  return encode_lsl(stmt);
   if (strcasecmp(m, "lsr") == 0)  return encode_lsr(stmt);
   if (strcasecmp(m, "asr") == 0)  return encode_asr(stmt);
+  if (strcasecmp(m, "neg") == 0)  return encode_neg(stmt);
 
   fprintf(stderr, "Error: unknown mnemonic \"%s\" at line: %d.\n", m, stmt->line);
   return 0;
