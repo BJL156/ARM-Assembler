@@ -2,7 +2,7 @@
 [![Language](https://img.shields.io/badge/language-C-blue.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20WSL-lightgrey.svg)](https://www.linux.org/)
 [![Architecture](https://img.shields.io/badge/target-AArch64-red.svg)](https://developer.arm.com/Architectures/AArch64)
-[![Instructions](https://img.shields.io/badge/instructions-35-success.svg)](#Supported-Instructions)
+[![Instructions](https://img.shields.io/badge/instructions-36-success.svg)](#Supported-Instructions)
 
 A lightweight, zero-dependency AArch64 assembler written from scratch in C. It compiles AArch64 assembly source code directly into Linux ELF64 executables. It can be executed on bare-metal hardware or using emulators like QEMU.
 
@@ -90,7 +90,7 @@ $ echo $?
 | Category | Instructions |
 |:----------|:------------|
 | Data Movement | `mov`, `ldr`, `str`, `ldrb`, `strb`, `adr`, `ldp`, `stp` |
-| Arithmetic | `add`, `sub`, `mul`, `udiv`, `sdiv` |
+| Arithmetic | `add`, `sub`, `mul`, `udiv`, `sdiv`, `neg` |
 | Shift | `lsl`, `lsr`, `asr` |
 | Bitwise | `and`, `orr`, `eor`, `mvn` |
 | Branching | `b`, `bl`, `b.eq`, `b.ne`, `b.lt`, `b.le`, `b.gt`, `b.ge`, `b.hi`, `b.lo`, `b.hs`, `b.ls`, `b.mi`, `b.pl`, `ret`, `cbz`, `cbnz` |
