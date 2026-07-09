@@ -66,7 +66,7 @@ $ echo $?
   - [x] Scans:
     - [x] End of file (`EOF`).
     - [x] New lines.
-    - [x] Directives.
+    - [x] Directives (`text`, `data`, `asciz`, `byte`, `word`, `quad`, `space`).
     - [x] Immediates.
     - [x] Registers (64 and 32 bit).
     - [x] Mnemonics.
