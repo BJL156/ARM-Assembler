@@ -68,7 +68,7 @@ $ echo $?
     - [x] New lines.
     - [x] Directives (`text`, `data`, `asciz`, `byte`, `word`, `quad`, `space`).
     - [x] Immediates.
-    - [x] Registers (64 and 32 bit).
+    - [x] 64 and 32 bit registers. (`x` and `w` respectively).
     - [x] Mnemonics.
     - [x] Strings.
 - Parser.
@@ -77,7 +77,7 @@ $ echo $?
 - Encoder.
   - [x] Converts all supported mnemonics into machine code.
 - ELF Builder.
-  - [x] Combines ELF header, Program header, and all machine code into a binary that can be ran within an AArch64 Linux enviroment or using an emulator.
+  - [x] Combines the ELF header, program header, machine code, and data into an ELF64 that can be ran within an AArch64 Linux enviroment or using an emulator.
 
 ## Current Limitations
 - Linux ELF64 output only.
