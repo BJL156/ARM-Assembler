@@ -1,6 +1,7 @@
 #include "encoder.h"
 #include "parser.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <strings.h>
 
@@ -707,6 +708,37 @@ uint32_t encode_neg(Stmt *stmt) {
   return base | (rm << 16) | rd;
 }
 
+uint32_t encode_movk(Stmt *stmt) {
+  if (stmt->instr.operand_count < 2 || stmt->instr.operand_count > 3) {
+    fprintf(stderr, "Error: movk takes 2 or 3 operands at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  Operand *dst = &stmt->instr.operands[0];
+  Operand *imm = &stmt->instr.operands[1];
+
+  if (dst->type != OP_REG || imm->type != OP_IMM) {
+    fprintf(stderr, "Error: movk expects register, immediate at line: %d.\n", stmt->line);
+    return 0;
+  }
+
+  uint32_t rd = (uint32_t)dst->reg & 0x1F;
+  uint32_t imm16 = (uint32_t)imm->imm & 0xFFFF;
+  uint32_t hw = 0;
+
+  if (stmt->instr.operand_count == 3) {
+    Operand *shift = &stmt->instr.operands[2];
+    if (shift->type != OP_IMM) {
+      fprintf(stderr, "Error: movk shift must be an immediate at line: %d.\n", stmt->line);
+      return 0;
+    }
+    hw = ((uint32_t)shift->imm / 16) & 0x3;
+  }
+
+  uint32_t base = dst->is_32bit ? 0x72800000 : 0xF2800000;
+  return base | (hw << 21) | (imm16 << 5) | rd;
+}
+
 uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   char *m = stmt->instr.mnemonic;
   if (strcasecmp(m, "mov") == 0)  return encode_mov(stmt);
@@ -750,6 +782,7 @@ uint32_t encode_instr(Stmt *stmt, uint32_t pc, SymTab *symtab) {
   if (strcasecmp(m, "lsr") == 0)  return encode_lsr(stmt);
   if (strcasecmp(m, "asr") == 0)  return encode_asr(stmt);
   if (strcasecmp(m, "neg") == 0)  return encode_neg(stmt);
+  if (strcasecmp(m, "movk") == 0) return encode_movk(stmt);
 
   fprintf(stderr, "Error: unknown mnemonic \"%s\" at line: %d.\n", m, stmt->line);
   return 0;
