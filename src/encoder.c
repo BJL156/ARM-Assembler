@@ -23,9 +23,15 @@ uint32_t encode_mov(Stmt *stmt) {
     return 0;
   }
 
-  if (src->type == OP_REG) {
-    uint32_t rd = (uint32_t)dst->reg & 0x1F;
+  uint32_t rd = (uint32_t)dst->reg & 0x1F;
+
+  if (src->type == OP_REG) { 
     uint32_t rm = (uint32_t)src->reg & 0x1F;
+    if (rd == 31 || rm == 31) {
+      uint32_t base = dst->is_32bit ? 0x11000000 : 0x91000000;
+      return base | (0 << 10) | (rm << 5) | rd;
+    }
+
     uint32_t base = dst->is_32bit ? 0x2A0003E0 : 0xAA0003E0;
     return base | (rm << 16) | rd;
   }
@@ -34,8 +40,6 @@ uint32_t encode_mov(Stmt *stmt) {
     fprintf(stderr, "Error: mov src must be a register and or immediate at line: %d.\n", stmt->line);
     return 0;
   }
-
-  uint32_t rd = (uint32_t)dst->reg & 0x1F;
 
   if (src->imm < 0) {
     uint32_t imm16 = (uint32_t)(~src->imm) & 0xFFFF;
