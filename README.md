@@ -6,7 +6,7 @@
 
 A lightweight, zero-dependency AArch64 assembler written from scratch in C. It compiles AArch64 assembly source code directly into Linux ELF64 executables. It can be executed on bare-metal hardware or using emulators like QEMU.
 
-This AArch64 assembler is the next step of my compiler AArch64 toolchain. it builds on my last project: [CPU Simulator](https://github.com/BJL156/CPU-Simulator). By targetting a real ISA.
+This AArch64 assembler is the next step of my compiler AArch64 toolchain. It builds on my last project: [CPU Simulator](https://github.com/BJL156/CPU-Simulator) by targetting a real ISA.
 
 ## Build
 > [!NOTE]
