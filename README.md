@@ -2,11 +2,11 @@
 [![Language](https://img.shields.io/badge/language-C-blue.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20WSL-lightgrey.svg)](https://www.linux.org/)
 [![Architecture](https://img.shields.io/badge/target-AArch64-red.svg)](https://developer.arm.com/Architectures/AArch64)
-[![Instructions](https://img.shields.io/badge/instructions-35-success.svg)](#Supported-Instructions)
+[![Instructions](https://img.shields.io/badge/instructions-37-success.svg)](#Supported-Instructions)
 
 A lightweight, zero-dependency AArch64 assembler written from scratch in C. It compiles AArch64 assembly source code directly into Linux ELF64 executables. It can be executed on bare-metal hardware or using emulators like QEMU.
 
-This AArch64 assembler is the next step of my compiler AArch64 toolchain. it builds on my last project: [CPU Simulator](https://github.com/BJL156/CPU-Simulator). By targetting a real ISA.
+This AArch64 assembler is the next step of my compiler AArch64 toolchain. It builds on my last project: [CPU Simulator](https://github.com/BJL156/CPU-Simulator) by targetting a real ISA.
 
 ## Build
 > [!NOTE]
@@ -66,9 +66,9 @@ $ echo $?
   - [x] Scans:
     - [x] End of file (`EOF`).
     - [x] New lines.
-    - [x] Directives.
+    - [x] Directives (`text`, `data`, `asciz`, `byte`, `word`, `quad`, `space`).
     - [x] Immediates.
-    - [x] Registers (64 and 32 bit).
+    - [x] 64 and 32 bit registers. (`x` and `w` respectively).
     - [x] Mnemonics.
     - [x] Strings.
 - Parser.
@@ -77,7 +77,7 @@ $ echo $?
 - Encoder.
   - [x] Converts all supported mnemonics into machine code.
 - ELF Builder.
-  - [x] Combines ELF header, Program header, and all machine code into a binary that can be ran within an AArch64 Linux enviroment or using an emulator.
+  - [x] Combines the ELF header, program header, machine code, and data into an ELF64 that can be ran within an AArch64 Linux enviroment or using an emulator.
 
 ## Current Limitations
 - Linux ELF64 output only.
@@ -89,8 +89,8 @@ $ echo $?
 ## Implemented AArch64 Instructions
 | Category | Instructions |
 |:----------|:------------|
-| Data Movement | `mov`, `ldr`, `str`, `ldrb`, `strb`, `adr`, `ldp`, `stp` |
-| Arithmetic | `add`, `sub`, `mul`, `udiv`, `sdiv` |
+| Data Movement | `mov`, `ldr`, `str`, `ldrb`, `strb`, `adr`, `ldp`, `stp`, `movk` |
+| Arithmetic | `add`, `sub`, `mul`, `udiv`, `sdiv`, `neg` |
 | Shift | `lsl`, `lsr`, `asr` |
 | Bitwise | `and`, `orr`, `eor`, `mvn` |
 | Branching | `b`, `bl`, `b.eq`, `b.ne`, `b.lt`, `b.le`, `b.gt`, `b.ge`, `b.hi`, `b.lo`, `b.hs`, `b.ls`, `b.mi`, `b.pl`, `ret`, `cbz`, `cbnz` |

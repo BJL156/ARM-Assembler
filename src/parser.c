@@ -107,6 +107,15 @@ Stmt parse_instr(Lexer *lexer, Token first) {
           op.mem.mode = MEM_POST_INDEX;
         }
       }
+    } else if (token.type == TOKEN_MNEMONIC && strcasecmp(token.str, "lsl") == 0) {
+      Token shift_imm = next_token(lexer);
+      if (shift_imm.type != TOKEN_IMM) {
+        fprintf(stderr, "Error: expected immediate after lsl at line: %d.\n", shift_imm.line);
+        break;
+      }
+
+      op.type = OP_IMM;
+      op.imm = shift_imm.imm;
     } else {
       fprintf(stderr, "Error: unexpected token in operand at line %d.\n", token.line);
       break;
