@@ -64,12 +64,24 @@ Token scan_newline(Lexer *lexer, Token *token) {
 
 Token scan_directive(Lexer *lexer, Token *token) {
   advance(lexer);
+
   int i = 0;
   while (isalnum(peek(lexer)) || peek(lexer) == '_') {
     token->str[i++] = advance(lexer);
   }
-
   token->str[i] = '\0';
+
+  if (peek(lexer) == ':') {
+    advance(lexer);
+    token->type = TOKEN_LABEL_DEF;
+    return *token;
+  }
+
+  if (token->str[0] == 'L') {
+    token->type = TOKEN_LABEL_REF;
+    return *token;
+  }
+
   token->type = TOKEN_DIRECTIVE;
   return *token;
 }
