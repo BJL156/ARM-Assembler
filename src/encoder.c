@@ -324,7 +324,7 @@ uint32_t encode_ldr_str(Stmt *stmt, uint32_t base64, uint32_t base32) {
     return 0;
   }
 
-  Operand *rt = &stmt->instr.operands[0];
+  Operand *rt  = &stmt->instr.operands[0];
   Operand *mem = &stmt->instr.operands[1];
 
   if (rt->type != OP_REG || mem->type != OP_MEM) {
@@ -334,6 +334,18 @@ uint32_t encode_ldr_str(Stmt *stmt, uint32_t base64, uint32_t base32) {
 
   uint32_t rd = (uint32_t)rt->reg & 0x1F;
   uint32_t rn = (uint32_t)mem->mem.base_reg & 0x1F;
+
+  if (mem->mem.offset < 0) {
+    uint32_t imm9;
+    uint32_t base;
+    if (rt->is_32bit) {
+      base = (base32 == 0xB9400000) ? 0xB8400000 : 0xB8000000;
+    } else {
+      base = (base64 == 0xF9400000) ? 0xF8400000 : 0xF8000000;
+    }
+    imm9 = (uint32_t)(mem->mem.offset) & 0x1FF;
+    return base | (imm9 << 12) | (rn << 5) | rd;
+  }
 
   if (rt->is_32bit) {
     if (mem->mem.offset % 4 != 0) {

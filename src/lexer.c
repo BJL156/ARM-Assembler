@@ -272,3 +272,11 @@ Token next_token(Lexer *lexer) {
   token.str[1] = '\0';
   return token;
 }
+
+char lexer_peek(Lexer *lexer) {
+  return peek(lexer);
+}
+
+char lexer_advance(Lexer *lexer) {
+  return advance(lexer);
+}

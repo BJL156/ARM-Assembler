@@ -1,3 +1,4 @@
+#include "lexer.h"
 #include "parser.h"
 
 #include <stdio.h>
@@ -89,7 +90,7 @@ Stmt parse_instr(Lexer *lexer, Token first) {
         if (imm.type == TOKEN_IMM) {
           op.mem.offset = imm.imm;
         }
-        next = next_token(lexer); // should be ']'
+        next = next_token(lexer);
       }
 
       if (next.type != TOKEN_RBRACKET) {
@@ -97,10 +98,12 @@ Stmt parse_instr(Lexer *lexer, Token first) {
         break;
       }
 
-      Token after = next_token(lexer);
-      if (after.type == TOKEN_UNKNOWN && after.str[0] == '!') {
+      char after = lexer_peek(lexer);
+      if (after == '!') {
+        lexer_advance(lexer);
         op.mem.mode = MEM_PRE_INDEX;
-      } else if (after.type == TOKEN_UNKNOWN && after.str[0] == ',') {
+      } else if (after == ',') {
+        lexer_advance(lexer);
         Token post_imm = next_token(lexer);
         if (post_imm.type == TOKEN_IMM) {
           op.mem.offset = post_imm.imm;
@@ -113,9 +116,11 @@ Stmt parse_instr(Lexer *lexer, Token first) {
         fprintf(stderr, "Error: expected immediate after lsl at line: %d.\n", shift_imm.line);
         break;
       }
-
       op.type = OP_IMM;
       op.imm = shift_imm.imm;
+    } else if (token.type == TOKEN_MNEMONIC) {
+      op.type = OP_LABEL;
+      strncpy(op.label, token.str, sizeof(op.label) - 1);
     } else {
       fprintf(stderr, "Error: unexpected token in operand at line %d.\n", token.line);
       break;
