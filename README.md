@@ -52,7 +52,7 @@ _start:
 ```
 ### Output
 ```bash
-$ ./build/assembler ./asm/hello.s build/hello
+$ ./build/assembler ./asm/hello.s ./build/hello
 $ ./build/hello (or qemu-aarch64 ./build/hello)
 Hello, world!
 $ echo $?
