@@ -335,30 +335,51 @@ uint32_t encode_ldr_str(Stmt *stmt, uint32_t base64, uint32_t base32) {
   uint32_t rd = (uint32_t)rt->reg & 0x1F;
   uint32_t rn = (uint32_t)mem->mem.base_reg & 0x1F;
 
-  if (mem->mem.offset < 0) {
+  if (mem->mem.mode == MEM_PRE_INDEX || mem->mem.mode == MEM_POST_INDEX) {
     uint32_t imm9;
     uint32_t base;
+    uint32_t opc;
+
     if (rt->is_32bit) {
       base = (base32 == 0xB9400000) ? 0xB8400000 : 0xB8000000;
     } else {
       base = (base64 == 0xF9400000) ? 0xF8400000 : 0xF8000000;
     }
-    imm9 = (uint32_t)(mem->mem.offset) & 0x1FF;
+
+    imm9 = (uint32_t)mem->mem.offset & 0x1FF;
+    opc = (mem->mem.mode == MEM_PRE_INDEX) ? (3 << 10) : (1 << 10);
+
+    return base | (imm9 << 12) | opc | (rn << 5) | rd;
+  }
+
+  if (mem->mem.offset < 0) {
+    uint32_t imm9;
+    uint32_t base;
+
+    if (rt->is_32bit) {
+      base = (base32 == 0xB9400000) ? 0xB8400000 : 0xB8000000;
+    } else {
+      base = (base64 == 0xF9400000) ? 0xF8400000 : 0xF8000000;
+    }
+
+    imm9 = (uint32_t)mem->mem.offset & 0x1FF;
     return base | (imm9 << 12) | (rn << 5) | rd;
   }
 
   if (rt->is_32bit) {
     if (mem->mem.offset % 4 != 0) {
-      fprintf(stderr, "Error: 32-bit ldr/str offset must be divisible by 4 at line: %d.\n", stmt->line);
+      fprintf(stderr, "Error: ldr/str offset must be divisible by 4 at line: %d.\n", stmt->line);
       return 0;
     }
+
     uint32_t imm12 = (uint32_t)(mem->mem.offset / 4) & 0xFFF;
     return base32 | (imm12 << 10) | (rn << 5) | rd;
   } else {
     if (mem->mem.offset % 8 != 0) {
-      fprintf(stderr, "Error: 64-bit ldr/str offset must be divisible by 8 at line: %d.\n", stmt->line);
+      fprintf(stderr, "Error: ldr/str offset must be divisible by 8 at line: %d.\n", stmt->line);
       return 0;
     }
+
     uint32_t imm12 = (uint32_t)(mem->mem.offset / 8) & 0xFFF;
     return base64 | (imm12 << 10) | (rn << 5) | rd;
   }
