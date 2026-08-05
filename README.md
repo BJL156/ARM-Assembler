@@ -8,6 +8,11 @@ A lightweight, zero-dependency AArch64 assembler written from scratch in C. It c
 
 This AArch64 assembler is the next step of my compiler AArch64 toolchain. It builds on my last project: [CPU Simulator](https://github.com/BJL156/CPU-Simulator) by targeting a real ISA.
 
+## Overview
+<p align="center">
+  <img src="docs/diagram.svg" width="800">
+</p>
+
 ## Build
 > [!NOTE]
 > **Needs to be built on Linux. For Windows, use WSL.**
