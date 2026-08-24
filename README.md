@@ -4,9 +4,9 @@
 [![Architecture](https://img.shields.io/badge/target-AArch64-red.svg)](https://developer.arm.com/Architectures/AArch64)
 [![Instructions](https://img.shields.io/badge/instructions-37-success.svg)](#Supported-Instructions)
 
-A lightweight, zero-dependency AArch64 assembler written from scratch in C. It compiles AArch64 assembly source code directly into Linux ELF64 executables. It can be executed on bare-metal hardware or using emulators like QEMU.
+A lightweight, zero-dependency AArch64 assembler written from scratch in C. It compiles AArch64 assembly source code directly into Linux ELF64 executables. It can be executed on bare-metal hardware such as a Raspberry Pi or using emulators like QEMU.
 
-This AArch64 assembler is the next step of my compiler AArch64 toolchain. It builds on my last project: [CPU Simulator](https://github.com/BJL156/CPU-Simulator) by targeting a real ISA.
+This is the next stage of my AArch64 toolchain. It builds on my last project: [CPU Simulator](https://github.com/BJL156/CPU-Simulator) by targeting a real ISA.
 
 ## Overview
 <p align="center">
@@ -73,7 +73,7 @@ $ echo $?
     - [x] New lines.
     - [x] Directives (`text`, `data`, `asciz`, `byte`, `word`, `quad`, `space`).
     - [x] Immediates.
-    - [x] 64 and 32 bit registers. (`x` and `w` respectively).
+    - [x] 64 and 32 bit registers. (`x` and `w`).
     - [x] Mnemonics.
     - [x] Strings.
 - Parser.
@@ -87,7 +87,6 @@ $ echo $?
 ## Current Limitations
 - Linux ELF64 output only.
 - Small set of AArch64 instructions.
-- No relocations.
 - No linker support (converts straight to an ELF64).
 - Single-file assembly programs only.
 
