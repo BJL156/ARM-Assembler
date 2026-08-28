@@ -4,7 +4,7 @@
 [![Architecture](https://img.shields.io/badge/target-AArch64-red.svg)](https://developer.arm.com/Architectures/AArch64)
 [![Instructions](https://img.shields.io/badge/instructions-37-success.svg)](#Supported-Instructions)
 
-A lightweight, zero-dependency AArch64 assembler written from scratch in C. It compiles AArch64 assembly source code directly into Linux ELF64 executables. It can be executed on bare-metal hardware such as a Raspberry Pi or using emulators like QEMU.
+A lightweight, zero-dependency AArch64 assembler written from scratch in C. It assembles AArch64 assembly source code directly into Linux ELF64 executables. It can be executed on bare-metal hardware such as a Raspberry Pi or using emulators like QEMU.
 
 This is the next stage of my AArch64 toolchain. It builds on my last project: [CPU Simulator](https://github.com/BJL156/CPU-Simulator) by targeting a real ISA.
 
@@ -82,7 +82,7 @@ $ echo $?
 - Encoder.
   - [x] Converts all supported mnemonics into machine code.
 - ELF Builder.
-  - [x] Combines the ELF header, program header, machine code, and data into an ELF64 that can be ran within an AArch64 Linux enviroment or using an emulator.
+  - [x] Combines the ELF header, program header, machine code, and data into an ELF64 that can be run within an AArch64 Linux environment or using an emulator.
 
 ## Current Limitations
 - Linux ELF64 output only.
