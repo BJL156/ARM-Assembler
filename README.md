@@ -55,7 +55,7 @@ _start:
   mov x8, #93
   svc #0
 ```
-### Output
+### Build and Run
 ```bash
 $ ./build/assembler ./asm/hello.s ./build/hello
 $ ./build/hello (or qemu-aarch64 ./build/hello)
