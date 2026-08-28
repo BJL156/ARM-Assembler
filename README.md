@@ -37,7 +37,7 @@ The final executable will be written to: `build/assembler`.
 ```
 
 ## Example
-### Input (`asm/hello.s`)
+### Input ([asm/hello.s](https://github.com/BJL156/ARM-Assembler/blob/main/asm/hello.s))
 ```s
 .global _start
 .data
