@@ -20,14 +20,14 @@ This is the next stage of my AArch64 toolchain. It builds on my last project: [C
 Clone the repository and change into its directory:
 ```bash
 git clone https://github.com/BJL156/ARM-Assembler
-cd ARM-Assembler
+cd ./ARM-Assembler
 ```
 Then use CMake:
 ```bash
 cmake -B build
 cmake --build build
 ```
-The final executable will be written to: `build/assembler`.
+The final executable will be written to: `./build/assembler`.
 
 ## Usage
 ```bash
@@ -37,7 +37,7 @@ The final executable will be written to: `build/assembler`.
 ```
 
 ## Example
-### Input ([asm/hello.s](https://github.com/BJL156/ARM-Assembler/blob/main/asm/hello.s))
+### Input ([./asm/hello.s](https://github.com/BJL156/ARM-Assembler/blob/main/asm/hello.s))
 ```s
 .global _start
 .data
@@ -57,8 +57,11 @@ _start:
 ```
 ### Build and Run
 ```bash
-$ ./build/assembler ./asm/hello.s ./build/hello
-$ ./build/hello (or qemu-aarch64 ./build/hello)
+# ARM Assembler:
+$ ./build/assembler ./asm/hello.s ./build/hello.out
+
+# Run:
+$ ./build/hello.out
 Hello, world!
 $ echo $?
 0
