@@ -10,7 +10,7 @@ This is the next stage of my AArch64 toolchain. It builds on my last project: [C
 
 ## Architecture
 <p align="center">
-  <img src="docs/architecture_diagram.svg" width="800">
+  <img src="docs/architecture_diagram.svg" width="300">
 </p>
 
 - **Solid border**: ARM C Compiler components
