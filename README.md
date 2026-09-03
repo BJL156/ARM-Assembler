@@ -79,26 +79,6 @@ $ echo $?
 0
 ```
 
-## Features
-- Lexer.
-  - [x] Converts AArch64 source into tokens.
-  - [x] Handles whitespaces and comments.
-  - [x] Scans:
-    - [x] End of file (`EOF`).
-    - [x] New lines.
-    - [x] Directives (`text`, `data`, `asciz`, `byte`, `word`, `quad`, `space`).
-    - [x] Immediates.
-    - [x] 64 and 32 bit registers. (`x` and `w`).
-    - [x] Mnemonics.
-    - [x] Strings.
-- Parser.
-  - [x] Converts Tokens into statements (`Stmt`).
-  - [x] Stores a dynamic array of statements (`Program`).
-- Encoder.
-  - [x] Converts all supported mnemonics into machine code.
-- ELF Builder.
-  - [x] Combines the ELF header, program header, machine code, and data into an ELF64 that can be run within an AArch64 Linux environment or using an emulator.
-
 ## Current Limitations
 - Linux ELF64 output only.
 - Small set of AArch64 instructions.
