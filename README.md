@@ -8,10 +8,25 @@ A lightweight, zero-dependency AArch64 assembler written from scratch in C. It a
 
 This is the next stage of my AArch64 toolchain. It builds on my last project: [CPU Simulator](https://github.com/BJL156/CPU-Simulator) by targeting a real ISA. While laying the foundation for my next project: [ARM C Compiler](https://github.com/BJL156/ARM-C-Compiler)
 
-## Overview
+## Architecture
 <p align="center">
-  <img src="docs/diagram.svg" width="800">
+  <img src="docs/architecture_diagram.svg" width="800">
 </p>
+
+- **Solid border**: ARM C Compiler components
+- **Dashed border**: External toolchain components
+
+### Lexer
+Reads AArch64 assembly source code and converts it into a sequence of tokens. It handles whitespace, comments, directives, registers, immediates, mnemonics, and strings.
+
+### Parser
+Converts the tokens into a dynamic array of statements and builds a `Program` which contains the parsed assembly source. It handles directives, labels, instructions, and operands.
+
+### Encoder
+Converts parsed AArch64 instructions into their corresponding machine-code encodings. It handles 32 and 64 bit encodings.
+
+### ELF Builder
+Combines the encoded machine code and data with the required ELF64 headers to produce a Linux AArch64 ELF64.
 
 ## Build
 > [!NOTE]
