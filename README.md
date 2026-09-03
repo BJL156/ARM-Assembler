@@ -79,12 +79,6 @@ $ echo $?
 0
 ```
 
-## Current Limitations
-- Linux ELF64 output only.
-- Small set of AArch64 instructions.
-- No linker support (converts straight to an ELF64).
-- Single-file assembly programs only.
-
 ## Implemented AArch64 Instructions
 | Category | Instructions |
 |:----------|:------------|
@@ -95,3 +89,9 @@ $ echo $?
 | Branching | `b`, `bl`, `b.eq`, `b.ne`, `b.lt`, `b.le`, `b.gt`, `b.ge`, `b.hi`, `b.lo`, `b.hs`, `b.ls`, `b.mi`, `b.pl`, `ret`, `cbz`, `cbnz` |
 | Comparison | `cmp` |
 | System / Hints | `svc`, `nop` |
+
+## Current Limitations
+- Linux ELF64 output only.
+- Small set of AArch64 instructions.
+- No linker support (converts straight to an ELF64).
+- Single-file assembly programs only.
