@@ -13,9 +13,6 @@ This is the next stage of my AArch64 toolchain. It builds on my last project: [C
   <img src="docs/architecture_diagram.svg" width="300">
 </p>
 
-- **Solid border**: ARM C Compiler components
-- **Dashed border**: External toolchain components
-
 ### Lexer
 Reads AArch64 assembly source code and converts it into a sequence of tokens. It handles whitespace, comments, directives, registers, immediates, mnemonics, and strings.
 
